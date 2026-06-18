@@ -72,6 +72,14 @@
   .ex-best { font-size: 10px; color: #555; letter-spacing: .06em; }
   .set-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   .set-chip { font-size: 12px; color: #777; background: #0a0a0a; border: 1px solid var(--b1); padding: 3px 11px; }
+  .set-chip-wrap { display: inline-flex; align-items: center; gap: 4px; }
+  .btn-edit-set { background: none; border: none; color: #333; font-size: 10px; cursor: pointer; padding: 2px 4px; line-height: 1; transition: color .12s; }
+  .btn-edit-set:hover { color: var(--t1); }
+  .set-edit-form { display: inline-flex; align-items: center; gap: 5px; }
+  .set-edit-form input { background: #0d0d0d; border: 1px solid var(--b3); color: var(--t1); font-size: 12px; padding: 2px 7px; width: 62px; outline: none; }
+  .set-edit-form input:focus { border-color: #555; }
+  .btn-save-set { background: var(--t1); color: var(--bg); border: none; font-size: 9px; font-weight: 700; letter-spacing: .1em; padding: 4px 9px; cursor: pointer; }
+  .btn-cancel-set { background: none; border: 1px solid var(--b3); color: var(--t3); font-size: 9px; font-weight: 700; letter-spacing: .1em; padding: 4px 9px; cursor: pointer; }
 
   /* ── LOG FORM ── */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
@@ -797,6 +805,9 @@ function renderHistory() {
   el.querySelectorAll('.btn-ai[data-summarize]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); summarizeSession(btn.dataset.summarize, btn) })
   })
+  el.querySelectorAll('.btn-edit-set').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); editSet(btn.closest('.set-chip-wrap')) })
+  })
 }
 
 function mediaHTML(set) {
@@ -816,7 +827,11 @@ function histSessionHTML(s) {
   sets.forEach(s => { if (!groups[s.exercise_name]) groups[s.exercise_name]=[]; groups[s.exercise_name].push(s) })
   const detailHTML = Object.entries(groups).map(([name, exSets]) => {
     const best = exSets.reduce((b,x)=>(!b.weight||(x.weight||0)>(b.weight||0)?x:b), exSets[0])
-    const chips = exSets.map(x=>`<span class="set-chip">${x.weight?x.weight+'kg':'BW'} × ${x.reps}</span>${mediaHTML(x)}`).join('')
+    const chips = exSets.map(x=>`
+      <span class="set-chip-wrap" data-set-id="${x.id}" data-weight="${x.weight??''}" data-reps="${x.reps}">
+        <span class="set-chip">${x.weight?x.weight+'kg':'BW'} &times; ${x.reps}</span>
+        <button class="btn-edit-set" title="Edit set">&#9998;</button>
+      </span>${mediaHTML(x)}`).join('')
     return `
       <div class="ex-block">
         <div class="ex-block-head">
@@ -853,6 +868,54 @@ function histSessionHTML(s) {
         <div style="padding:0 18px 10px;"><button class="btn-danger" data-del="${s.id}">Delete Session</button></div>
       </div>
     </div>`
+}
+
+async function editSet(wrap) {
+  const setId  = wrap.dataset.setId
+  const weight = wrap.dataset.weight
+  const reps   = wrap.dataset.reps
+
+  // Replace chip with inline form
+  wrap.innerHTML = `
+    <span class="set-edit-form">
+      <input type="number" class="edit-weight" placeholder="kg" value="${weight}" min="0" step="0.5" />
+      <span style="color:var(--t3);font-size:12px;">×</span>
+      <input type="number" class="edit-reps" placeholder="reps" value="${reps}" min="1" step="1" />
+      <button class="btn-save-set">Save</button>
+      <button class="btn-cancel-set">Cancel</button>
+    </span>`
+
+  const form       = wrap.querySelector('.set-edit-form')
+  const weightInp  = form.querySelector('.edit-weight')
+  const repsInp    = form.querySelector('.edit-reps')
+  weightInp.focus()
+
+  form.querySelector('.btn-cancel-set').addEventListener('click', () => {
+    wrap.innerHTML = `
+      <span class="set-chip">${weight ? weight + 'kg' : 'BW'} &times; ${reps}</span>
+      <button class="btn-edit-set" title="Edit set">&#9998;</button>`
+    wrap.querySelector('.btn-edit-set').addEventListener('click', e => { e.stopPropagation(); editSet(wrap) })
+  })
+
+  form.querySelector('.btn-save-set').addEventListener('click', async () => {
+    const newWeight = weightInp.value !== '' ? parseFloat(weightInp.value) : null
+    const newReps   = parseInt(repsInp.value)
+    if (!newReps || newReps < 1) return
+
+    form.querySelector('.btn-save-set').textContent = '...'
+    const { error } = await db.from('workout_sets')
+      .update({ weight: newWeight, reps: newReps })
+      .eq('id', setId)
+
+    if (error) { alert('Save failed: ' + error.message); return }
+
+    wrap.dataset.weight = newWeight ?? ''
+    wrap.dataset.reps   = newReps
+    wrap.innerHTML = `
+      <span class="set-chip">${newWeight ? newWeight + 'kg' : 'BW'} &times; ${newReps}</span>
+      <button class="btn-edit-set" title="Edit set">&#9998;</button>`
+    wrap.querySelector('.btn-edit-set').addEventListener('click', e => { e.stopPropagation(); editSet(wrap) })
+  })
 }
 
 async function summarizeSession(sessionId, btn) {
