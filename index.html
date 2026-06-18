@@ -15,12 +15,16 @@
 
   html, body { background: var(--bg); color: var(--t1); font-family: Arial, 'Helvetica Neue', sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; }
 
+  /* ── NAV ── */
   nav { position: sticky; top: 0; z-index: 99; background: var(--bg); border-bottom: 1px solid var(--b1); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 58px; }
   .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
   .brand-name { font-size: 15px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; color: var(--t1); }
-  .nav-links { display: flex; gap: 2px; }
+  .nav-links { display: flex; gap: 2px; align-items: center; }
   .nav-btn { background: none; border: none; cursor: pointer; color: var(--t3); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 14px; transition: color .12s; }
   .nav-btn:hover, .nav-btn.active { color: var(--t1); }
+  .nav-user { font-size: 10px; color: var(--t3); letter-spacing: .08em; padding: 0 10px; border-right: 1px solid var(--b2); margin-right: 4px; }
+  .nav-logout { background: none; border: 1px solid var(--b3); color: var(--t3); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 5px 12px; cursor: pointer; transition: all .12s; }
+  .nav-logout:hover { color: var(--t1); border-color: var(--t1); }
 
   main { max-width: 900px; margin: 0 auto; padding: 36px 24px; }
   .page { display: none; flex-direction: column; gap: 36px; }
@@ -75,23 +79,20 @@
   .form-group { display: flex; flex-direction: column; gap: 14px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label { font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #555; }
-  input[type=text], input[type=number], select { background: var(--bg3); border: 1px solid var(--b3); color: var(--t1); padding: 10px 13px; font-size: 14px; outline: none; width: 100%; transition: border-color .12s; appearance: none; }
+  input[type=text], input[type=number], input[type=email], input[type=password], select {
+    background: var(--bg3); border: 1px solid var(--b3); color: var(--t1);
+    padding: 10px 13px; font-size: 14px; outline: none; width: 100%;
+    transition: border-color .12s; appearance: none;
+  }
   input:focus, select:focus { border-color: var(--t1); }
   select option { background: #111; color: #fff; }
   .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   /* file upload */
-  .file-label {
-    display: flex; align-items: center; gap: 10px; cursor: pointer;
-    border: 1px dashed var(--b3); padding: 10px 14px;
-    color: var(--t3); font-size: 11px; letter-spacing: .08em;
-    transition: all .12s;
-  }
+  .file-label { display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px dashed var(--b3); padding: 10px 14px; color: var(--t3); font-size: 11px; letter-spacing: .08em; transition: all .12s; }
   .file-label:hover { border-color: var(--t2); color: var(--t2); }
   .file-label.has-file { border-color: var(--t1); color: var(--t1); border-style: solid; }
   .file-preview-img { width: 100%; max-height: 110px; object-fit: cover; border: 1px solid var(--b1); display: none; margin-top: 4px; }
-
-  /* media in history */
   .media-thumb { width: 56px; height: 56px; object-fit: cover; border: 1px solid var(--b2); cursor: pointer; vertical-align: middle; }
   .media-file-link { font-size: 10px; color: var(--t3); text-decoration: none; border: 1px solid var(--b2); padding: 3px 9px; letter-spacing: .06em; white-space: nowrap; }
   .media-file-link:hover { color: var(--t1); border-color: var(--t1); }
@@ -120,6 +121,66 @@
   .empty { color: var(--t3); font-size: 13px; padding: 56px 0; text-align: center; border-top: 1px solid var(--b1); }
   .empty a { color: #666; }
 
+  /* ── AUTH PAGE ── */
+  #auth-screen {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    padding: 24px;
+  }
+  #auth-screen.active { display: flex; }
+
+  .auth-box {
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid var(--b1);
+    background: var(--bg3);
+  }
+
+  .auth-brand {
+    display: flex; align-items: center; gap: 14px;
+    padding: 28px 28px 0;
+    border-bottom: 1px solid var(--b1);
+    padding-bottom: 24px;
+  }
+  .auth-brand-text { font-size: 20px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; }
+  .auth-tagline { font-size: 9px; color: var(--t3); letter-spacing: .16em; text-transform: uppercase; margin-top: 2px; }
+
+  .auth-tabs { display: flex; border-bottom: 1px solid var(--b1); }
+  .auth-tab {
+    flex: 1; padding: 14px; text-align: center; cursor: pointer;
+    font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--t3); background: none; border: none; border-bottom: 2px solid transparent;
+    transition: all .12s;
+  }
+  .auth-tab.active { color: var(--t1); border-bottom-color: var(--t1); }
+
+  .auth-form { display: none; flex-direction: column; gap: 18px; padding: 28px; }
+  .auth-form.active { display: flex; }
+
+  .auth-error {
+    font-size: 11px; color: #888; background: #0d0d0d;
+    border: 1px solid #2a2a2a; padding: 10px 14px;
+    letter-spacing: .04em; display: none;
+  }
+  .auth-error.visible { display: block; }
+
+  .auth-submit {
+    background: var(--t1); color: var(--bg); font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase; padding: 13px; border: none;
+    cursor: pointer; transition: opacity .12s; width: 100%;
+  }
+  .auth-submit:hover:not(:disabled) { opacity: .85; }
+  .auth-submit:disabled { opacity: .3; cursor: not-allowed; }
+
+  .auth-footer { font-size: 10px; color: var(--t3); text-align: center; padding: 0 28px 24px; letter-spacing: .04em; }
+
+  /* ── APP WRAPPER ── */
+  #app { display: none; }
+  #app.active { display: block; }
+
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-track { background: #0a0a0a; }
   ::-webkit-scrollbar-thumb { background: var(--b2); }
@@ -127,158 +188,211 @@
 </head>
 <body>
 
-<nav>
-  <div class="brand" onclick="showPage('dashboard')">
-    <svg width="28" height="32" viewBox="0 0 100 115" fill="none">
-      <path d="M50 4 L94 22 L94 58 C94 82 72 104 50 111 C28 104 6 82 6 58 L6 22 Z" fill="#000" stroke="#fff" stroke-width="3"/>
-      <path d="M62 32 C62 32 38 32 38 42 C38 52 62 52 62 62 C62 72 38 72 38 72" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none"/>
-    </svg>
-    <span class="brand-name">Fortress</span>
-  </div>
-  <div class="nav-links">
-    <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">Dashboard</button>
-    <button class="nav-btn" id="nav-log" onclick="showPage('log')">Log</button>
-    <button class="nav-btn" id="nav-history" onclick="showPage('history')">History</button>
-  </div>
-</nav>
+<!-- ══ AUTH SCREEN ══ -->
+<div id="auth-screen" class="active">
+  <div class="auth-box">
 
-<main>
-
-  <!-- ══ DASHBOARD ══ -->
-  <div class="page active" id="page-dashboard">
-    <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div class="auth-brand">
+      <svg width="36" height="41" viewBox="0 0 100 115" fill="none">
+        <path d="M50 4 L94 22 L94 58 C94 82 72 104 50 111 C28 104 6 82 6 58 L6 22 Z" fill="#111" stroke="#fff" stroke-width="3"/>
+        <path d="M62 32 C62 32 38 32 38 42 C38 52 62 52 62 62 C62 72 38 72 38 72" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none"/>
+      </svg>
       <div>
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
-          <svg width="52" height="60" viewBox="0 0 100 115" fill="none">
-            <path d="M50 4 L94 22 L94 58 C94 82 72 104 50 111 C28 104 6 82 6 58 L6 22 Z" fill="#000" stroke="#fff" stroke-width="3"/>
-            <path d="M62 32 C62 32 38 32 38 42 C38 52 62 52 62 62 C62 72 38 72 38 72" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none"/>
-          </svg>
-          <div>
-            <div class="label" style="margin-bottom:6px;">Steel. Discipline. Power.</div>
-            <div style="font-size:36px;font-weight:900;letter-spacing:-.01em;line-height:1;">FORTRESS</div>
+        <div class="auth-brand-text">Fortress</div>
+        <div class="auth-tagline">Steel. Discipline. Power.</div>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')">Login</button>
+      <button class="auth-tab"        id="tab-register" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Login form -->
+    <form class="auth-form active" id="form-login" onsubmit="handleLogin(event)">
+      <div id="login-error" class="auth-error"></div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="auth-submit" id="btn-login">Login</button>
+    </form>
+
+    <!-- Register form -->
+    <form class="auth-form" id="form-register" onsubmit="handleRegister(event)">
+      <div id="register-error" class="auth-error"></div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 characters" required autocomplete="new-password" minlength="6" />
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="reg-confirm" placeholder="Repeat password" required autocomplete="new-password" />
+      </div>
+      <button type="submit" class="auth-submit" id="btn-register">Create Account</button>
+    </form>
+
+    <div class="auth-footer" id="auth-footer-msg"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <nav>
+    <div class="brand" onclick="showPage('dashboard')">
+      <svg width="28" height="32" viewBox="0 0 100 115" fill="none">
+        <path d="M50 4 L94 22 L94 58 C94 82 72 104 50 111 C28 104 6 82 6 58 L6 22 Z" fill="#000" stroke="#fff" stroke-width="3"/>
+        <path d="M62 32 C62 32 38 32 38 42 C38 52 62 52 62 62 C62 72 38 72 38 72" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="brand-name">Fortress</span>
+    </div>
+    <div class="nav-links">
+      <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-btn" id="nav-log" onclick="showPage('log')">Log</button>
+      <button class="nav-btn" id="nav-history" onclick="showPage('history')">History</button>
+      <span class="nav-user" id="nav-user-email"></span>
+      <button class="nav-logout" onclick="handleLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+            <svg width="52" height="60" viewBox="0 0 100 115" fill="none">
+              <path d="M50 4 L94 22 L94 58 C94 82 72 104 50 111 C28 104 6 82 6 58 L6 22 Z" fill="#000" stroke="#fff" stroke-width="3"/>
+              <path d="M62 32 C62 32 38 32 38 42 C38 52 62 52 62 62 C62 72 38 72 38 72" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none"/>
+            </svg>
+            <div>
+              <div class="label" style="margin-bottom:6px;">Steel. Discipline. Power.</div>
+              <div style="font-size:36px;font-weight:900;letter-spacing:-.01em;line-height:1;">FORTRESS</div>
+            </div>
+          </div>
+          <div id="dash-today-msg" class="label" style="color:#555;"></div>
+        </div>
+        <button class="btn-primary" onclick="showPage('log')">+ Log Workout</button>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-cell"><div class="stat-label">Total Sessions</div><div class="stat-val" id="stat-total">—</div></div>
+        <div class="stat-cell"><div class="stat-label">This Week</div><div class="stat-val" id="stat-week">—</div></div>
+        <div class="stat-cell"><div class="stat-label">Push / Pull / Legs</div><div class="stat-val" id="stat-ppl">—</div></div>
+      </div>
+
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+          <div class="label">Recent Sessions</div>
+          <div class="filter-bar">
+            <button class="filter-btn active" onclick="dashFilter('all',this)">All</button>
+            <button class="filter-btn" onclick="dashFilter('push',this)">Push</button>
+            <button class="filter-btn" onclick="dashFilter('pull',this)">Pull</button>
+            <button class="filter-btn" onclick="dashFilter('legs',this)">Legs</button>
           </div>
         </div>
-        <div id="dash-today-msg" class="label" style="color:#555;"></div>
+        <div id="dash-sessions"></div>
       </div>
-      <button class="btn-primary" onclick="showPage('log')">+ Log Workout</button>
     </div>
 
-    <div class="stat-strip">
-      <div class="stat-cell"><div class="stat-label">Total Sessions</div><div class="stat-val" id="stat-total">—</div></div>
-      <div class="stat-cell"><div class="stat-label">This Week</div><div class="stat-val" id="stat-week">—</div></div>
-      <div class="stat-cell"><div class="stat-label">Push / Pull / Legs</div><div class="stat-val" id="stat-ppl">—</div></div>
-    </div>
+    <!-- ══ LOG ══ -->
+    <div class="page" id="page-log">
+      <div class="page-header">
+        <div class="label">Log Workout</div>
+        <h1 class="page-title">NEW SESSION</h1>
+      </div>
 
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
-        <div class="label">Recent Sessions</div>
+      <div>
+        <div class="label" style="margin-bottom:12px;">Session Type</div>
         <div class="filter-bar">
-          <button class="filter-btn active" onclick="dashFilter('all',this)">All</button>
-          <button class="filter-btn" onclick="dashFilter('push',this)">Push</button>
-          <button class="filter-btn" onclick="dashFilter('pull',this)">Pull</button>
-          <button class="filter-btn" onclick="dashFilter('legs',this)">Legs</button>
+          <button class="filter-btn active" onclick="setCategory('push',this)">Push</button>
+          <button class="filter-btn" onclick="setCategory('pull',this)">Pull</button>
+          <button class="filter-btn" onclick="setCategory('legs',this)">Legs</button>
         </div>
       </div>
-      <div id="dash-sessions"></div>
-    </div>
-  </div>
 
-  <!-- ══ LOG ══ -->
-  <div class="page" id="page-log">
-    <div class="page-header">
-      <div class="label">Log Workout</div>
-      <h1 class="page-title">NEW SESSION</h1>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="label">Add Set</div>
+          <div class="field">
+            <label>Exercise</label>
+            <select id="ex-select" onchange="onExerciseChange()">
+              <option value="">— Select exercise —</option>
+            </select>
+          </div>
+          <div id="custom-fields" style="display:none;flex-direction:column;gap:14px;">
+            <div class="field">
+              <label>Exercise Name</label>
+              <input type="text" id="custom-name" placeholder="e.g. Cable Fly" />
+            </div>
+            <div class="field">
+              <label>Muscle Targeted</label>
+              <input type="text" id="custom-muscle" placeholder="e.g. Chest" />
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>Weight (kg)</label>
+              <input type="number" id="inp-weight" placeholder="0" min="0" step="0.5" />
+            </div>
+            <div class="field">
+              <label>Reps *</label>
+              <input type="number" id="inp-reps" placeholder="0" min="1" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Media (optional)</label>
+            <label class="file-label" id="file-label" for="inp-file">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              <span id="file-name-display">Attach image / video / PDF</span>
+            </label>
+            <input type="file" id="inp-file" accept="image/*,video/*,application/pdf" style="display:none" onchange="onFileChange()" />
+            <img id="file-preview-img" class="file-preview-img" alt="preview" />
+          </div>
+          <button class="btn-ghost" id="btn-add-set" onclick="addSet()" disabled>+ Add Set</button>
+        </div>
+
+        <div>
+          <div class="sets-panel-header">
+            <div class="label">Sets Logged</div>
+            <div class="label" id="set-count-label" style="color:var(--t3);">0 sets</div>
+          </div>
+          <div id="sets-display"><div class="sets-empty">No sets added yet</div></div>
+        </div>
+      </div>
+
+      <div class="finish-bar">
+        <button class="btn-primary" id="btn-finish" onclick="finishSession()" disabled>Finish Session</button>
+        <span class="save-msg" id="save-msg"></span>
+      </div>
     </div>
 
-    <div>
-      <div class="label" style="margin-bottom:12px;">Session Type</div>
+    <!-- ══ HISTORY ══ -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <div class="label">Training Log</div>
+        <h1 class="page-title">HISTORY</h1>
+      </div>
       <div class="filter-bar">
-        <button class="filter-btn active" onclick="setCategory('push',this)">Push</button>
-        <button class="filter-btn" onclick="setCategory('pull',this)">Pull</button>
-        <button class="filter-btn" onclick="setCategory('legs',this)">Legs</button>
+        <button class="filter-btn active" onclick="histFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="histFilter('push',this)">Push</button>
+        <button class="filter-btn" onclick="histFilter('pull',this)">Pull</button>
+        <button class="filter-btn" onclick="histFilter('legs',this)">Legs</button>
       </div>
+      <div id="hist-sessions"></div>
     </div>
 
-    <div class="form-grid">
-      <!-- left: add set -->
-      <div class="form-group">
-        <div class="label">Add Set</div>
-
-        <div class="field">
-          <label>Exercise</label>
-          <select id="ex-select" onchange="onExerciseChange()">
-            <option value="">— Select exercise —</option>
-          </select>
-        </div>
-
-        <div id="custom-fields" style="display:none;flex-direction:column;gap:14px;">
-          <div class="field">
-            <label>Exercise Name</label>
-            <input type="text" id="custom-name" placeholder="e.g. Cable Fly" />
-          </div>
-          <div class="field">
-            <label>Muscle Targeted</label>
-            <input type="text" id="custom-muscle" placeholder="e.g. Chest" />
-          </div>
-        </div>
-
-        <div class="input-row">
-          <div class="field">
-            <label>Weight (kg)</label>
-            <input type="number" id="inp-weight" placeholder="0" min="0" step="0.5" />
-          </div>
-          <div class="field">
-            <label>Reps *</label>
-            <input type="number" id="inp-reps" placeholder="0" min="1" />
-          </div>
-        </div>
-
-        <!-- ── FILE UPLOAD ── -->
-        <div class="field">
-          <label>Media (optional)</label>
-          <label class="file-label" id="file-label" for="inp-file">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-            <span id="file-name-display">Attach image / video / PDF</span>
-          </label>
-          <input type="file" id="inp-file" accept="image/*,video/*,application/pdf" style="display:none" onchange="onFileChange()" />
-          <img id="file-preview-img" class="file-preview-img" alt="preview" />
-        </div>
-
-        <button class="btn-ghost" id="btn-add-set" onclick="addSet()" disabled>+ Add Set</button>
-      </div>
-
-      <!-- right: sets logged -->
-      <div>
-        <div class="sets-panel-header">
-          <div class="label">Sets Logged</div>
-          <div class="label" id="set-count-label" style="color:var(--t3);">0 sets</div>
-        </div>
-        <div id="sets-display"><div class="sets-empty">No sets added yet</div></div>
-      </div>
-    </div>
-
-    <div class="finish-bar">
-      <button class="btn-primary" id="btn-finish" onclick="finishSession()" disabled>Finish Session</button>
-      <span class="save-msg" id="save-msg"></span>
-    </div>
-  </div>
-
-  <!-- ══ HISTORY ══ -->
-  <div class="page" id="page-history">
-    <div class="page-header">
-      <div class="label">Training Log</div>
-      <h1 class="page-title">HISTORY</h1>
-    </div>
-    <div class="filter-bar">
-      <button class="filter-btn active" onclick="histFilter('all',this)">All</button>
-      <button class="filter-btn" onclick="histFilter('push',this)">Push</button>
-      <button class="filter-btn" onclick="histFilter('pull',this)">Pull</button>
-      <button class="filter-btn" onclick="histFilter('legs',this)">Legs</button>
-    </div>
-    <div id="hist-sessions"></div>
-  </div>
-
-</main>
+  </main>
+</div><!-- #app -->
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -286,19 +400,90 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SUPA_URL = 'https://enzopvdeyxichitmoosn.supabase.co'
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuem9wdmRleXhpY2hpdG1vb3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MTU5MTYsImV4cCI6MjA5NzI5MTkxNn0._S-oNfp3zdD62kzw3QvbKxlsNWuSy679VNV3_Ng_9YE'
 const db = createClient(SUPA_URL, SUPA_KEY)
-
 const BUCKET = 'exercises'
 
 // ── State ──────────────────────────────────────────────────────────────────
-let exercises         = []
-let allSessions       = []
-let pendingSets       = []   // { exerciseName, muscleTargeted, weight, reps, setNumber, file? }
-let currentCat        = 'push'
-let dashCurrentFilter = 'all'
-let histCurrentFilter = 'all'
-let pendingFile       = null  // File object staged for next addSet()
+let exercises = [], allSessions = [], pendingSets = []
+let currentCat = 'push', dashCurrentFilter = 'all', histCurrentFilter = 'all'
+let pendingFile = null, currentUser = null
 
-// ── Boot ───────────────────────────────────────────────────────────────────
+// ══ AUTH ════════════════════════════════════════════════════════════════════
+
+// Tab switcher
+window.switchTab = function(tab) {
+  document.getElementById('form-login').classList.toggle('active',    tab === 'login')
+  document.getElementById('form-register').classList.toggle('active', tab === 'register')
+  document.getElementById('tab-login').classList.toggle('active',    tab === 'login')
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register')
+  document.getElementById('auth-footer-msg').textContent = ''
+}
+
+function showAuthError(formId, msg) {
+  const el = document.getElementById(formId + '-error')
+  el.textContent = msg
+  el.classList.add('visible')
+}
+function clearAuthError(formId) {
+  const el = document.getElementById(formId + '-error')
+  el.textContent = ''
+  el.classList.remove('visible')
+}
+
+window.handleLogin = async function(e) {
+  e.preventDefault()
+  clearAuthError('login')
+  const email    = document.getElementById('login-email').value.trim()
+  const password = document.getElementById('login-password').value
+  const btn = document.getElementById('btn-login')
+  btn.disabled = true; btn.textContent = 'Logging in...'
+
+  const { error } = await db.auth.signInWithPassword({ email, password })
+  btn.disabled = false; btn.textContent = 'Login'
+  if (error) showAuthError('login', error.message)
+}
+
+window.handleRegister = async function(e) {
+  e.preventDefault()
+  clearAuthError('register')
+  const email    = document.getElementById('reg-email').value.trim()
+  const password = document.getElementById('reg-password').value
+  const confirm  = document.getElementById('reg-confirm').value
+  if (password !== confirm) { showAuthError('register', 'Passwords do not match.'); return }
+
+  const btn = document.getElementById('btn-register')
+  btn.disabled = true; btn.textContent = 'Creating account...'
+
+  const { error } = await db.auth.signUp({ email, password })
+  btn.disabled = false; btn.textContent = 'Create Account'
+
+  if (error) { showAuthError('register', error.message); return }
+  document.getElementById('auth-footer-msg').textContent =
+    'Account created. Check your email to confirm, then log in.'
+  switchTab('login')
+}
+
+window.handleLogout = async function() {
+  await db.auth.signOut()
+}
+
+// Auth state listener — single source of truth
+db.auth.onAuthStateChange((_event, session) => {
+  if (session?.user) {
+    currentUser = session.user
+    document.getElementById('nav-user-email').textContent = currentUser.email
+    document.getElementById('auth-screen').classList.remove('active')
+    document.getElementById('app').classList.add('active')
+    boot()
+  } else {
+    currentUser = null
+    document.getElementById('auth-screen').classList.add('active')
+    document.getElementById('app').classList.remove('active')
+    allSessions = []; exercises = []; pendingSets = []
+  }
+})
+
+// ══ APP ═════════════════════════════════════════════════════════════════════
+
 async function boot() {
   const { data } = await db.from('exercises').select('*').order('name')
   exercises = data ?? []
@@ -315,7 +500,7 @@ async function loadSessions() {
   allSessions = data ?? []
 }
 
-// ── Nav ────────────────────────────────────────────────────────────────────
+// ── Nav ───────────────────────────────────────────────────────────────────
 window.showPage = function(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
@@ -325,12 +510,11 @@ window.showPage = function(name) {
   if (name === 'history')   renderHistory()
 }
 
-// ── Dashboard ──────────────────────────────────────────────────────────────
+// ── Dashboard ─────────────────────────────────────────────────────────────
 window.dashFilter = function(cat, btn) {
   dashCurrentFilter = cat
   document.querySelectorAll('#page-dashboard .filter-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
-  renderSessionList()
+  btn.classList.add('active'); renderSessionList()
 }
 
 function renderDashboard() {
@@ -361,12 +545,11 @@ function renderSessionList() {
 }
 
 function sessionRowHTML(s) {
-  const sets   = s.workout_sets ?? []
-  const volume = sets.reduce((a, x) => a + (x.weight || 0) * x.reps, 0)
-  const names  = [...new Set(sets.map(x => x.exercise_name))]
-  const date   = new Date(s.session_date + 'T00:00:00')
-  const tags   = names.slice(0,4).map(n => `<span class="ex-tag">${n}</span>`).join('')
-  const more   = names.length > 4 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-4} more</span>` : ''
+  const sets = s.workout_sets ?? [], volume = sets.reduce((a,x)=>a+(x.weight||0)*x.reps,0)
+  const names = [...new Set(sets.map(x=>x.exercise_name))]
+  const date  = new Date(s.session_date + 'T00:00:00')
+  const tags  = names.slice(0,4).map(n=>`<span class="ex-tag">${n}</span>`).join('')
+  const more  = names.length > 4 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-4} more</span>` : ''
   return `
     <div class="session-row">
       <div class="session-date">
@@ -377,26 +560,25 @@ function sessionRowHTML(s) {
       <div class="ex-tags">${tags}${more}</div>
       <div class="session-meta">
         <div class="meta-col"><div class="meta-label">Sets</div><div class="meta-val">${sets.length}</div></div>
-        <div class="meta-col"><div class="meta-label">Volume</div><div class="meta-val">${volume > 0 ? volume.toLocaleString()+' kg' : '—'}</div></div>
+        <div class="meta-col"><div class="meta-label">Volume</div><div class="meta-val">${volume>0?volume.toLocaleString()+' kg':'—'}</div></div>
         <button class="btn-danger" data-id="${s.id}">Del</button>
       </div>
     </div>`
 }
 
-// ── Log ────────────────────────────────────────────────────────────────────
+// ── Log ───────────────────────────────────────────────────────────────────
 window.setCategory = function(cat, btn) {
   currentCat = cat
   document.querySelectorAll('#page-log .filter-btn').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
-  pendingSets = []; clearFileInput()
-  populateExerciseSelect(); renderSets()
+  pendingSets = []; clearFileInput(); populateExerciseSelect(); renderSets()
 }
 
 function populateExerciseSelect() {
   const sel = document.getElementById('ex-select')
   sel.innerHTML = `<option value="">— Select exercise —</option>` +
     exercises.filter(e => e.category === currentCat)
-      .map(e => `<option value="${e.id}" data-muscle="${e.muscle_targeted}">${e.name} (${e.muscle_targeted})</option>`).join('') +
+      .map(e=>`<option value="${e.id}" data-muscle="${e.muscle_targeted}">${e.name} (${e.muscle_targeted})</option>`).join('') +
     `<option value="__custom__">+ Custom exercise</option>`
   document.getElementById('custom-fields').style.display = 'none'
   updateAddBtn()
@@ -408,27 +590,16 @@ window.onExerciseChange = function() {
   updateAddBtn()
 }
 
-// ── File handling ──────────────────────────────────────────────────────────
 window.onFileChange = function() {
-  const input = document.getElementById('inp-file')
-  const file  = input.files[0]
+  const file = document.getElementById('inp-file').files[0]
   const label = document.getElementById('file-label')
-  const nameEl = document.getElementById('file-name-display')
   const preview = document.getElementById('file-preview-img')
-
   if (!file) { pendingFile = null; clearFileInput(); return }
-
   pendingFile = file
-  nameEl.textContent = file.name
+  document.getElementById('file-name-display').textContent = file.name
   label.classList.add('has-file')
-
-  if (file.type.startsWith('image/')) {
-    const url = URL.createObjectURL(file)
-    preview.src = url
-    preview.style.display = 'block'
-  } else {
-    preview.style.display = 'none'
-  }
+  if (file.type.startsWith('image/')) { preview.src = URL.createObjectURL(file); preview.style.display = 'block' }
+  else { preview.style.display = 'none' }
 }
 
 function clearFileInput() {
@@ -436,15 +607,13 @@ function clearFileInput() {
   document.getElementById('inp-file').value = ''
   document.getElementById('file-name-display').textContent = 'Attach image / video / PDF'
   document.getElementById('file-label').classList.remove('has-file')
-  document.getElementById('file-preview-img').style.display = 'none'
-  document.getElementById('file-preview-img').src = ''
+  const p = document.getElementById('file-preview-img'); p.style.display = 'none'; p.src = ''
 }
 
 function updateAddBtn() {
-  const v  = document.getElementById('ex-select').value
-  const r  = document.getElementById('inp-reps').value
-  const ok = v && r && (v !== '__custom__' || document.getElementById('custom-name').value.trim())
-  document.getElementById('btn-add-set').disabled = !ok
+  const v = document.getElementById('ex-select').value, r = document.getElementById('inp-reps').value
+  document.getElementById('btn-add-set').disabled =
+    !v || !r || (v === '__custom__' && !document.getElementById('custom-name').value.trim())
 }
 
 document.getElementById('ex-select').addEventListener('change', updateAddBtn)
@@ -452,167 +621,120 @@ document.getElementById('inp-reps').addEventListener('input', updateAddBtn)
 document.getElementById('custom-name').addEventListener('input', updateAddBtn)
 
 window.addSet = function() {
-  const sel    = document.getElementById('ex-select')
-  const reps   = document.getElementById('inp-reps').value
-  const weight = document.getElementById('inp-weight').value
+  const sel = document.getElementById('ex-select')
+  const reps = document.getElementById('inp-reps').value, weight = document.getElementById('inp-weight').value
   let name, muscle
-
   if (sel.value === '__custom__') {
-    name   = document.getElementById('custom-name').value.trim()
+    name = document.getElementById('custom-name').value.trim()
     muscle = document.getElementById('custom-muscle').value.trim() || '—'
   } else {
     const opt = sel.options[sel.selectedIndex]
-    name   = opt.text.replace(/ \(.+\)$/, '')
-    muscle = opt.dataset.muscle
+    name = opt.text.replace(/ \(.+\)$/, ''); muscle = opt.dataset.muscle
   }
-
   const setNum = pendingSets.filter(s => s.exerciseName === name).length + 1
-  pendingSets.push({
-    exerciseName: name, muscleTargeted: muscle,
-    weight, reps: parseInt(reps), setNumber: setNum,
-    file: pendingFile   // attach staged file (may be null)
-  })
-
-  document.getElementById('inp-weight').value = ''
-  document.getElementById('inp-reps').value   = ''
-  clearFileInput()
-  updateAddBtn()
-  renderSets()
+  pendingSets.push({ exerciseName: name, muscleTargeted: muscle, weight, reps: parseInt(reps), setNumber: setNum, file: pendingFile })
+  document.getElementById('inp-weight').value = ''; document.getElementById('inp-reps').value = ''
+  clearFileInput(); updateAddBtn(); renderSets()
 }
 
 function renderSets() {
   const el = document.getElementById('sets-display')
   document.getElementById('set-count-label').textContent = `${pendingSets.length} sets`
   document.getElementById('btn-finish').disabled = pendingSets.length === 0
-
   if (!pendingSets.length) { el.innerHTML = `<div class="sets-empty">No sets added yet</div>`; return }
-
   const groups = {}
-  pendingSets.forEach((s, i) => {
-    if (!groups[s.exerciseName]) groups[s.exerciseName] = []
-    groups[s.exerciseName].push({ ...s, idx: i })
-  })
-
+  pendingSets.forEach((s, i) => { if (!groups[s.exerciseName]) groups[s.exerciseName] = []; groups[s.exerciseName].push({...s, idx: i}) })
   el.innerHTML = `<div class="set-rows">` +
     Object.entries(groups).map(([name, rows]) => `
       <div>
-        <div class="set-group-head">
-          <span>${name}</span>
-          <span style="color:var(--t3);font-size:10px;">${rows[0].muscleTargeted}</span>
-        </div>
-        ${rows.map(r => `
+        <div class="set-group-head"><span>${name}</span><span style="color:var(--t3);font-size:10px;">${rows[0].muscleTargeted}</span></div>
+        ${rows.map(r=>`
           <div class="set-row">
             <span class="set-num">${r.setNumber}</span>
-            <span class="set-info">${r.weight ? r.weight+' kg' : 'BW'} × ${r.reps}</span>
-            ${r.file ? `<span class="set-has-media">📎 ${r.file.name.length > 14 ? r.file.name.slice(0,12)+'…' : r.file.name}</span>` : ''}
+            <span class="set-info">${r.weight?r.weight+' kg':'BW'} × ${r.reps}</span>
+            ${r.file?`<span class="set-has-media">📎 ${r.file.name.length>14?r.file.name.slice(0,12)+'…':r.file.name}</span>`:''}
             <button class="btn-danger" data-idx="${r.idx}">✕</button>
           </div>`).join('')}
-      </div>`).join('') +
-    `</div>`
-
+      </div>`).join('') + `</div>`
   el.querySelectorAll('.btn-danger').forEach(btn => {
     btn.addEventListener('click', () => {
       pendingSets.splice(parseInt(btn.dataset.idx), 1)
-      const counts = {}
-      pendingSets.forEach(s => { counts[s.exerciseName] = (counts[s.exerciseName] || 0) + 1; s.setNumber = counts[s.exerciseName] })
+      const counts = {}; pendingSets.forEach(s => { counts[s.exerciseName]=(counts[s.exerciseName]||0)+1; s.setNumber=counts[s.exerciseName] })
       renderSets()
     })
   })
 }
 
-// ── Upload file to Supabase Storage ────────────────────────────────────────
 async function uploadFile(sessionId, set) {
   if (!set.file) return null
   const ext  = set.file.name.split('.').pop()
   const path = `${sessionId}/${set.exerciseName.replace(/\s+/g,'-')}-set${set.setNumber}-${Date.now()}.${ext}`
   const { error } = await db.storage.from(BUCKET).upload(path, set.file, { upsert: true })
   if (error) { console.error('Upload error:', error.message); return null }
-  const { data } = db.storage.from(BUCKET).getPublicUrl(path)
-  return data.publicUrl
+  return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl
 }
 
-// ── Finish session ─────────────────────────────────────────────────────────
 window.finishSession = async function() {
-  if (!pendingSets.length) return
+  if (!pendingSets.length || !currentUser) return
   document.getElementById('btn-finish').disabled = true
   document.getElementById('save-msg').textContent = 'Saving...'
 
   const { data: sess, error } = await db
     .from('workout_sessions')
-    .insert({ session_date: todayStr(), category: currentCat })
+    .insert({ session_date: todayStr(), category: currentCat, user_id: currentUser.id })
     .select().single()
 
   if (error || !sess) {
     document.getElementById('save-msg').textContent = 'Error saving session.'
-    document.getElementById('btn-finish').disabled = false
-    return
+    document.getElementById('btn-finish').disabled = false; return
   }
 
-  // Upload files & build rows
   document.getElementById('save-msg').textContent = 'Uploading media...'
-  const rows = await Promise.all(pendingSets.map(async s => {
-    const mediaUrl = await uploadFile(sess.id, s)
-    return {
-      session_id:      sess.id,
-      exercise_name:   s.exerciseName,
-      muscle_targeted: s.muscleTargeted,
-      category:        currentCat,
-      weight:          s.weight ? parseFloat(s.weight) : null,
-      reps:            s.reps,
-      set_number:      s.setNumber,
-      media_url:       mediaUrl,
-    }
-  }))
+  const rows = await Promise.all(pendingSets.map(async s => ({
+    session_id: sess.id, exercise_name: s.exerciseName, muscle_targeted: s.muscleTargeted,
+    category: currentCat, weight: s.weight ? parseFloat(s.weight) : null,
+    reps: s.reps, set_number: s.setNumber, media_url: await uploadFile(sess.id, s),
+  })))
 
   await db.from('workout_sets').insert(rows)
-
-  pendingSets = []
-  renderSets()
+  pendingSets = []; renderSets()
   document.getElementById('save-msg').textContent = 'Session saved.'
   setTimeout(() => document.getElementById('save-msg').textContent = '', 3000)
   await loadSessions()
 }
 
-// ── History ────────────────────────────────────────────────────────────────
+// ── History ───────────────────────────────────────────────────────────────
 window.histFilter = function(cat, btn) {
   histCurrentFilter = cat
   document.querySelectorAll('#page-history .filter-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
-  renderHistory()
+  btn.classList.add('active'); renderHistory()
 }
 
 function renderHistory() {
   const filtered = histCurrentFilter === 'all' ? allSessions : allSessions.filter(s => s.category === histCurrentFilter)
   const el = document.getElementById('hist-sessions')
   if (!filtered.length) { el.innerHTML = `<div class="empty">No sessions found.</div>`; return }
-
   const months = {}
   filtered.forEach(s => {
-    const key = new Date(s.session_date + 'T00:00:00').toLocaleDateString('en-US', { year:'numeric', month:'long' })
-    if (!months[key]) months[key] = []
-    months[key].push(s)
+    const key = new Date(s.session_date+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long'})
+    if (!months[key]) months[key] = []; months[key].push(s)
   })
-
   el.innerHTML = Object.entries(months).map(([month, sessions]) => `
     <div style="margin-bottom:30px;">
       <div class="label" style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--b1);">
-        ${month} · ${sessions.length} session${sessions.length > 1 ? 's' : ''}
+        ${month} · ${sessions.length} session${sessions.length>1?'s':''}
       </div>
       <div class="session-list" style="gap:1px;">${sessions.map(histSessionHTML).join('')}</div>
     </div>`).join('')
-
   el.querySelectorAll('.session-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
-      const detail = btn.nextElementSibling
-      const open   = detail.classList.toggle('open')
+      const detail = btn.nextElementSibling; const open = detail.classList.toggle('open')
       btn.querySelector('.chevron').textContent = open ? '▲' : '▼'
     })
   })
-
   el.querySelectorAll('.btn-danger[data-del]').forEach(btn => {
     btn.addEventListener('click', async e => {
-      e.stopPropagation()
-      if (!confirm('Delete this session?')) return
+      e.stopPropagation(); if (!confirm('Delete this session?')) return
       await db.from('workout_sessions').delete().eq('id', btn.dataset.del)
       await loadSessions(); renderHistory()
     })
@@ -622,39 +744,30 @@ function renderHistory() {
 function mediaHTML(set) {
   if (!set.media_url) return ''
   const url = set.media_url
-  const isImage = /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url)
-  const isVideo = /\.(mp4|mov|webm)(\?|$)/i.test(url)
-  if (isImage) return `<a href="${url}" target="_blank"><img src="${url}" class="media-thumb" title="View image" /></a>`
-  if (isVideo) return `<a href="${url}" target="_blank" class="media-file-link">▶ Video</a>`
+  if (/\.(jpe?g|png|gif|webp)(\?|$)/i.test(url)) return `<a href="${url}" target="_blank"><img src="${url}" class="media-thumb" /></a>`
+  if (/\.(mp4|mov|webm)(\?|$)/i.test(url)) return `<a href="${url}" target="_blank" class="media-file-link">▶ Video</a>`
   return `<a href="${url}" target="_blank" class="media-file-link">📎 File</a>`
 }
 
 function histSessionHTML(s) {
-  const sets   = s.workout_sets ?? []
-  const volume = sets.reduce((a, x) => a + (x.weight || 0) * x.reps, 0)
-  const date   = new Date(s.session_date + 'T00:00:00')
-  const names  = [...new Set(sets.map(x => x.exercise_name))]
-  const tags   = names.slice(0,3).map(n => `<span class="ex-tag">${n}</span>`).join('')
-  const more   = names.length > 3 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-3}</span>` : ''
-
+  const sets = s.workout_sets??[], volume = sets.reduce((a,x)=>a+(x.weight||0)*x.reps,0)
+  const date = new Date(s.session_date+'T00:00:00'), names = [...new Set(sets.map(x=>x.exercise_name))]
+  const tags = names.slice(0,3).map(n=>`<span class="ex-tag">${n}</span>`).join('')
+  const more = names.length > 3 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-3}</span>` : ''
   const groups = {}
-  sets.forEach(s => { if (!groups[s.exercise_name]) groups[s.exercise_name] = []; groups[s.exercise_name].push(s) })
-
+  sets.forEach(s => { if (!groups[s.exercise_name]) groups[s.exercise_name]=[]; groups[s.exercise_name].push(s) })
   const detailHTML = Object.entries(groups).map(([name, exSets]) => {
-    const best  = exSets.reduce((b, x) => (!b.weight || (x.weight||0) > (b.weight||0) ? x : b), exSets[0])
-    const chips = exSets.map(x => `
-      <span class="set-chip">${x.weight ? x.weight+'kg' : 'BW'} × ${x.reps}</span>
-      ${mediaHTML(x)}`).join('')
+    const best = exSets.reduce((b,x)=>(!b.weight||(x.weight||0)>(b.weight||0)?x:b), exSets[0])
+    const chips = exSets.map(x=>`<span class="set-chip">${x.weight?x.weight+'kg':'BW'} × ${x.reps}</span>${mediaHTML(x)}`).join('')
     return `
       <div class="ex-block">
         <div class="ex-block-head">
           <div><span class="ex-name">${name}</span><span class="ex-muscle">${exSets[0].muscle_targeted}</span></div>
-          ${best.weight ? `<span class="ex-best">Best: ${best.weight} kg × ${best.reps}</span>` : ''}
+          ${best.weight?`<span class="ex-best">Best: ${best.weight} kg × ${best.reps}</span>`:''}
         </div>
         <div class="set-chips">${chips}</div>
       </div>`
   }).join('')
-
   return `
     <div class="session-wrap">
       <button class="session-toggle">
@@ -666,22 +779,18 @@ function histSessionHTML(s) {
         <div class="ex-tags">${tags}${more}</div>
         <div class="session-meta">
           <div class="meta-col"><div class="meta-label">Sets</div><div class="meta-val">${sets.length}</div></div>
-          <div class="meta-col"><div class="meta-label">Volume</div><div class="meta-val">${volume > 0 ? volume.toLocaleString()+' kg' : '—'}</div></div>
+          <div class="meta-col"><div class="meta-label">Volume</div><div class="meta-val">${volume>0?volume.toLocaleString()+' kg':'—'}</div></div>
         </div>
         <span class="chevron">▼</span>
       </button>
       <div class="session-detail">
         ${detailHTML}
-        <div style="padding:10px 18px;">
-          <button class="btn-danger" data-del="${s.id}">Delete Session</button>
-        </div>
+        <div style="padding:10px 18px;"><button class="btn-danger" data-del="${s.id}">Delete Session</button></div>
       </div>
     </div>`
 }
 
 function todayStr() { return new Date().toISOString().split('T')[0] }
-
-boot()
 </script>
 </body>
 </html>
