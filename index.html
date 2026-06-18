@@ -474,9 +474,10 @@ window.handleLogin = async function(e) {
   btn.disabled = false; btn.textContent = 'Login'
 
   if (!error && !remember) {
-    // Clear the persisted token so the session ends when the browser closes
-    const key = `sb-enzopvdeyxichitmoosn-auth-token`
-    localStorage.removeItem(key)
+    // Remove all Supabase auth keys regardless of exact key format
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('sb-') && k.includes('auth'))
+      .forEach(k => localStorage.removeItem(k))
   }
 
   if (error) {
