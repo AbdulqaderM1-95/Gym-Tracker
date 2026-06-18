@@ -599,12 +599,23 @@ function renderSessionList() {
   const el = document.getElementById('dash-sessions')
   if (!filtered.length) { el.innerHTML = `<div class="empty">No sessions found. <a onclick="showPage('log')" style="cursor:pointer;">Log one now.</a></div>`; return }
   el.innerHTML = `<div class="session-list">${filtered.slice(0,20).map(sessionRowHTML).join('')}</div>`
-  el.querySelectorAll('.btn-danger').forEach(btn => {
-    btn.addEventListener('click', async () => {
+  el.querySelectorAll('.session-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const detail = btn.nextElementSibling
+      detail.classList.toggle('open')
+      btn.querySelector('.chevron').textContent = detail.classList.contains('open') ? '▲' : '▼'
+    })
+  })
+  el.querySelectorAll('.btn-danger[data-id]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation()
       if (!confirm('Delete this session?')) return
       await db.from('workout_sessions').delete().eq('id', btn.dataset.id)
       await loadSessions(); renderDashboard()
     })
+  })
+  el.querySelectorAll('.btn-edit-set').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); editSet(btn.closest('.set-chip-wrap')) })
   })
 }
 
@@ -614,18 +625,40 @@ function sessionRowHTML(s) {
   const date  = new Date(s.session_date + 'T00:00:00')
   const tags  = names.slice(0,4).map(n=>`<span class="ex-tag">${n}</span>`).join('')
   const more  = names.length > 4 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-4} more</span>` : ''
-  return `
-    <div class="session-row">
-      <div class="session-date">
-        <div class="dow">${date.toLocaleDateString('en-US',{weekday:'short'})}</div>
-        <div class="d">${date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+
+  const groups = {}
+  sets.forEach(x => { if (!groups[x.exercise_name]) groups[x.exercise_name]=[]; groups[x.exercise_name].push(x) })
+  const setsDetail = Object.entries(groups).map(([name, exSets]) => `
+    <div class="ex-block">
+      <div class="ex-block-head">
+        <div><span class="ex-name">${name}</span><span class="ex-muscle">${exSets[0].muscle_targeted}</span></div>
       </div>
-      <span class="cat-pill ${s.category}">${s.category}</span>
-      <div class="ex-tags">${tags}${more}</div>
-      <div class="session-meta">
-        <div class="meta-col"><div class="meta-label">Sets</div><div class="meta-val">${sets.length}</div></div>
-        <div class="meta-col"><div class="meta-label">Volume</div><div class="meta-val">${volume>0?volume.toLocaleString()+' kg':'—'}</div></div>
-        <button class="btn-danger" data-id="${s.id}">Del</button>
+      <div class="set-chips">${exSets.map(x=>`
+        <span class="set-chip-wrap" data-set-id="${x.id}" data-weight="${x.weight??''}" data-reps="${x.reps}">
+          <span class="set-chip">${x.weight?x.weight+'kg':'BW'} &times; ${x.reps}</span>
+          <button class="btn-edit-set" title="Edit set">&#9998;</button>
+        </span>`).join('')}
+      </div>
+    </div>`).join('')
+
+  return `
+    <div class="session-card-wrap">
+      <button class="session-toggle">
+        <div class="session-date">
+          <div class="dow">${date.toLocaleDateString('en-US',{weekday:'short'})}</div>
+          <div class="d">${date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+        </div>
+        <span class="cat-pill ${s.category}">${s.category}</span>
+        <div class="ex-tags">${tags}${more}</div>
+        <div class="session-meta">
+          <div class="meta-col"><div class="meta-label">Sets</div><div class="meta-val">${sets.length}</div></div>
+          <div class="meta-col"><div class="meta-label">Volume</div><div class="meta-val">${volume>0?volume.toLocaleString()+' kg':'—'}</div></div>
+        </div>
+        <span class="chevron">&#9660;</span>
+      </button>
+      <div class="session-detail">
+        ${setsDetail}
+        <div style="padding:10px 18px;"><button class="btn-danger" data-id="${s.id}">Delete Session</button></div>
       </div>
     </div>`
 }
