@@ -181,6 +181,15 @@
   #app { display: none; }
   #app.active { display: block; }
 
+  /* ── AI SUMMARY ── */
+  .ai-summary-bar { padding: 0 18px 14px; }
+  .btn-ai { background: none; border: 1px solid #2a2a2a; color: #555; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; transition: all .15s; }
+  .btn-ai:hover:not(:disabled) { border-color: var(--t1); color: var(--t1); }
+  .btn-ai:disabled { opacity: .4; cursor: not-allowed; }
+  .ai-summary-box { margin-top: 10px; border: 1px solid #1e1e1e; background: #080808; padding: 14px 16px; font-size: 13px; color: #aaa; line-height: 1.65; letter-spacing: .01em; display: none; }
+  .ai-summary-box.visible { display: block; }
+  .ai-summary-label { font-size: 8px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #333; margin-bottom: 8px; }
+
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-track { background: #0a0a0a; }
   ::-webkit-scrollbar-thumb { background: var(--b2); }
@@ -739,6 +748,9 @@ function renderHistory() {
       await loadSessions(); renderHistory()
     })
   })
+  el.querySelectorAll('.btn-ai[data-summarize]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); summarizeSession(btn.dataset.summarize, btn) })
+  })
 }
 
 function mediaHTML(set) {
@@ -785,9 +797,46 @@ function histSessionHTML(s) {
       </button>
       <div class="session-detail">
         ${detailHTML}
-        <div style="padding:10px 18px;"><button class="btn-danger" data-del="${s.id}">Delete Session</button></div>
+        <div class="ai-summary-bar">
+          <button class="btn-ai" data-summarize="${s.id}">&#9670; AI Summary</button>
+          <div class="ai-summary-box" id="ai-box-${s.id}">
+            <div class="ai-summary-label">Claude — Session Summary</div>
+            <div class="ai-summary-text"></div>
+          </div>
+        </div>
+        <div style="padding:0 18px 10px;"><button class="btn-danger" data-del="${s.id}">Delete Session</button></div>
       </div>
     </div>`
+}
+
+async function summarizeSession(sessionId, btn) {
+  const box  = document.getElementById('ai-box-' + sessionId)
+  const text = box.querySelector('.ai-summary-text')
+  if (box.classList.contains('visible')) { box.classList.remove('visible'); btn.textContent = '◆ AI Summary'; return }
+
+  btn.disabled = true; btn.textContent = 'Thinking...'
+  const { data: { session: authSession } } = await db.auth.getSession()
+  const jwt = authSession?.access_token
+  if (!jwt) { btn.disabled = false; btn.textContent = '◆ AI Summary'; return }
+
+  try {
+    const res = await fetch(
+      `https://enzopvdeyxichitmoosn.supabase.co/functions/v1/summarize-session`,
+      { method: 'POST',
+        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId }) }
+    )
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || res.statusText)
+    text.textContent = json.summary
+    box.classList.add('visible')
+    btn.textContent = '◆ Hide Summary'
+  } catch (err) {
+    text.textContent = 'Error: ' + err.message
+    box.classList.add('visible')
+    btn.textContent = '◆ AI Summary'
+  }
+  btn.disabled = false
 }
 
 function todayStr() { return new Date().toISOString().split('T')[0] }
