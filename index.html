@@ -178,6 +178,9 @@
   .auth-footer { font-size: 10px; color: var(--t3); text-align: center; padding: 0 28px 24px; letter-spacing: .04em; }
   .auth-resend { background: none; border: none; color: #555; font-size: 10px; letter-spacing: .08em; text-decoration: underline; cursor: pointer; padding: 0; margin-top: -8px; text-align: left; }
   .auth-resend:hover { color: var(--t2); }
+  .remember-row { display: flex; align-items: center; gap: 8px; padding: 0 28px; margin-top: -4px; }
+  .remember-row input[type="checkbox"] { accent-color: var(--t1); width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }
+  .remember-row label { font-size: 10px; color: var(--t3); letter-spacing: .08em; cursor: pointer; user-select: none; }
 
   /* ── APP WRAPPER ── */
   #app { display: none; }
@@ -229,6 +232,10 @@
       <div class="field">
         <label>Password</label>
         <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <div class="remember-row">
+        <input type="checkbox" id="remember-me" checked />
+        <label for="remember-me">Remember me</label>
       </div>
       <button type="submit" class="auth-submit" id="btn-login">Login</button>
       <button type="button" class="auth-resend" id="btn-resend" onclick="resendConfirmation()" style="display:none">
@@ -454,8 +461,15 @@ window.handleLogin = async function(e) {
   const btn = document.getElementById('btn-login')
   btn.disabled = true; btn.textContent = 'Logging in...'
 
+  const remember = document.getElementById('remember-me').checked
   const { error } = await db.auth.signInWithPassword({ email, password })
   btn.disabled = false; btn.textContent = 'Login'
+
+  if (!error && !remember) {
+    // Clear the persisted token so the session ends when the browser closes
+    const key = `sb-enzopvdeyxichitmoosn-auth-token`
+    localStorage.removeItem(key)
+  }
 
   if (error) {
     const isUnconfirmed = error.message.toLowerCase().includes('email not confirmed')
