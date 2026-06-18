@@ -176,6 +176,8 @@
   .auth-submit:disabled { opacity: .3; cursor: not-allowed; }
 
   .auth-footer { font-size: 10px; color: var(--t3); text-align: center; padding: 0 28px 24px; letter-spacing: .04em; }
+  .auth-resend { background: none; border: none; color: #555; font-size: 10px; letter-spacing: .08em; text-decoration: underline; cursor: pointer; padding: 0; margin-top: -8px; text-align: left; }
+  .auth-resend:hover { color: var(--t2); }
 
   /* ── APP WRAPPER ── */
   #app { display: none; }
@@ -229,6 +231,9 @@
         <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
       </div>
       <button type="submit" class="auth-submit" id="btn-login">Login</button>
+      <button type="button" class="auth-resend" id="btn-resend" onclick="resendConfirmation()" style="display:none">
+        Resend confirmation email
+      </button>
     </form>
 
     <!-- Register form -->
@@ -438,9 +443,12 @@ function clearAuthError(formId) {
   el.classList.remove('visible')
 }
 
+const SITE_URL = 'https://abdulqaderm1-95.github.io/Gym-Tracker/'
+
 window.handleLogin = async function(e) {
   e.preventDefault()
   clearAuthError('login')
+  document.getElementById('btn-resend').style.display = 'none'
   const email    = document.getElementById('login-email').value.trim()
   const password = document.getElementById('login-password').value
   const btn = document.getElementById('btn-login')
@@ -448,7 +456,18 @@ window.handleLogin = async function(e) {
 
   const { error } = await db.auth.signInWithPassword({ email, password })
   btn.disabled = false; btn.textContent = 'Login'
-  if (error) showAuthError('login', error.message)
+
+  if (error) {
+    const isUnconfirmed = error.message.toLowerCase().includes('email not confirmed')
+    showAuthError('login', isUnconfirmed
+      ? 'Email not confirmed. Check your inbox and click the confirmation link.'
+      : error.message)
+    if (isUnconfirmed) {
+      const resendBtn = document.getElementById('btn-resend')
+      resendBtn.dataset.email = email
+      resendBtn.style.display = 'block'
+    }
+  }
 }
 
 window.handleRegister = async function(e) {
@@ -462,13 +481,26 @@ window.handleRegister = async function(e) {
   const btn = document.getElementById('btn-register')
   btn.disabled = true; btn.textContent = 'Creating account...'
 
-  const { error } = await db.auth.signUp({ email, password })
+  const { error } = await db.auth.signUp({
+    email, password,
+    options: { emailRedirectTo: SITE_URL }
+  })
   btn.disabled = false; btn.textContent = 'Create Account'
 
   if (error) { showAuthError('register', error.message); return }
   document.getElementById('auth-footer-msg').textContent =
-    'Account created. Check your email to confirm, then log in.'
+    'Check your inbox — click the confirmation link to activate your account.'
   switchTab('login')
+}
+
+window.resendConfirmation = async function() {
+  const email = document.getElementById('btn-resend').dataset.email
+  if (!email) return
+  const btn = document.getElementById('btn-resend')
+  btn.textContent = 'Sending...'
+  const { error } = await db.auth.resend({ type: 'signup', email, options: { emailRedirectTo: SITE_URL } })
+  btn.textContent = error ? 'Failed — try again' : 'Sent! Check your inbox.'
+  setTimeout(() => { btn.textContent = 'Resend confirmation email' }, 4000)
 }
 
 window.handleLogout = async function() {
