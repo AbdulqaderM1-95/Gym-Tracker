@@ -8,129 +8,66 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:   #000;
-    --bg2:  #0a0a0a;
-    --bg3:  #111;
-    --b1:   #1a1a1a;
-    --b2:   #2a2a2a;
-    --b3:   #333;
-    --t1:   #fff;
-    --t2:   #888;
-    --t3:   #444;
+    --bg:  #000; --bg2: #0a0a0a; --bg3: #111;
+    --b1:  #1a1a1a; --b2: #2a2a2a; --b3: #333;
+    --t1:  #fff;    --t2: #888;    --t3: #444;
   }
 
-  html, body {
-    background: var(--bg);
-    color: var(--t1);
-    font-family: Arial, 'Helvetica Neue', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-  }
+  html, body { background: var(--bg); color: var(--t1); font-family: Arial, 'Helvetica Neue', sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; }
 
-  /* ── NAV ── */
-  nav {
-    position: sticky; top: 0; z-index: 99;
-    background: var(--bg);
-    border-bottom: 1px solid var(--b1);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 28px; height: 58px;
-  }
+  nav { position: sticky; top: 0; z-index: 99; background: var(--bg); border-bottom: 1px solid var(--b1); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 58px; }
   .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-  .brand-name {
-    font-size: 15px; font-weight: 900;
-    letter-spacing: .22em; text-transform: uppercase; color: var(--t1);
-  }
+  .brand-name { font-size: 15px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; color: var(--t1); }
   .nav-links { display: flex; gap: 2px; }
-  .nav-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--t3); font-size: 10px; font-weight: 700;
-    letter-spacing: .14em; text-transform: uppercase;
-    padding: 8px 14px; transition: color .12s;
-  }
+  .nav-btn { background: none; border: none; cursor: pointer; color: var(--t3); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 14px; transition: color .12s; }
   .nav-btn:hover, .nav-btn.active { color: var(--t1); }
 
-  /* ── LAYOUT ── */
   main { max-width: 900px; margin: 0 auto; padding: 36px 24px; }
   .page { display: none; flex-direction: column; gap: 36px; }
   .page.active { display: flex; }
 
-  /* ── TYPOGRAPHY ── */
-  .label {
-    font-size: 9px; font-weight: 700;
-    letter-spacing: .2em; text-transform: uppercase; color: var(--t3);
-  }
-  h1.page-title {
-    font-size: 28px; font-weight: 900;
-    letter-spacing: -.01em; color: var(--t1);
-  }
+  .label { font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--t3); }
+  h1.page-title { font-size: 28px; font-weight: 900; letter-spacing: -.01em; color: var(--t1); }
   .page-header { border-bottom: 1px solid var(--b1); padding-bottom: 24px; }
   .page-header .label { margin-bottom: 6px; }
 
-  /* ── FILTER BAR ── */
   .filter-bar { display: flex; gap: 4px; }
-  .filter-btn {
-    background: transparent; border: 1px solid var(--b3);
-    color: var(--t2); font-size: 10px; font-weight: 700;
-    letter-spacing: .12em; text-transform: uppercase;
-    padding: 7px 20px; cursor: pointer; transition: all .12s;
-  }
+  .filter-btn { background: transparent; border: 1px solid var(--b3); color: var(--t2); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 7px 20px; cursor: pointer; transition: all .12s; }
   .filter-btn:hover { border-color: var(--t1); color: var(--t1); }
   .filter-btn.active { background: var(--t1); color: var(--bg); border-color: var(--t1); }
 
-  /* ── STAT STRIP ── */
   .stat-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--b1); }
   .stat-cell { background: var(--bg); padding: 18px 22px; }
   .stat-label { font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--t3); margin-bottom: 8px; }
   .stat-val { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
 
-  /* ── SESSION LIST ── */
   .session-list { display: flex; flex-direction: column; gap: 1px; background: var(--b1); }
-  .session-row {
-    background: var(--bg); padding: 14px 18px;
-    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-  }
+  .session-row { background: var(--bg); padding: 14px 18px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
   .session-date .dow { font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: .08em; }
-  .session-date .d   { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
-  .cat-pill {
-    font-size: 9px; font-weight: 700; letter-spacing: .14em;
-    text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--b3);
-  }
+  .session-date .d { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+  .cat-pill { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--b3); }
   .cat-pill.push { background: var(--t1); color: var(--bg); border-color: var(--t1); }
   .cat-pill.pull { background: #1e1e1e; color: var(--t1); }
   .cat-pill.legs { background: var(--b2); color: #aaa; }
   .ex-tags { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
-  .ex-tag {
-    font-size: 11px; color: #666; background: #0d0d0d;
-    padding: 2px 9px; border: 1px solid var(--b1);
-  }
+  .ex-tag { font-size: 11px; color: #666; background: #0d0d0d; padding: 2px 9px; border: 1px solid var(--b1); }
   .session-meta { display: flex; gap: 20px; align-items: center; margin-left: auto; }
   .meta-col { text-align: right; }
   .meta-col .meta-label { font-size: 9px; color: var(--t3); text-transform: uppercase; letter-spacing: .1em; }
-  .meta-col .meta-val   { font-size: 15px; font-weight: 700; color: #bbb; }
+  .meta-col .meta-val { font-size: 15px; font-weight: 700; color: #bbb; }
 
-  /* expandable history */
   .session-wrap { background: var(--bg); }
-  .session-toggle {
-    width: 100%; background: none; border: none; cursor: pointer;
-    padding: 14px 18px; display: flex; align-items: center; gap: 18px;
-    flex-wrap: wrap; text-align: left; color: inherit;
-  }
+  .session-toggle { width: 100%; background: none; border: none; cursor: pointer; padding: 14px 18px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; text-align: left; color: inherit; }
   .chevron { color: var(--t3); font-size: 11px; margin-left: auto; }
-  .session-detail {
-    border-top: 1px solid #0d0d0d; padding-bottom: 14px;
-    display: none;
-  }
+  .session-detail { border-top: 1px solid #0d0d0d; padding-bottom: 14px; display: none; }
   .session-detail.open { display: block; }
   .ex-block { padding: 14px 18px; border-bottom: 1px solid #0a0a0a; }
   .ex-block-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
   .ex-name { font-size: 13px; font-weight: 700; color: #ddd; letter-spacing: .02em; }
   .ex-muscle { font-size: 10px; color: var(--t3); margin-left: 10px; }
   .ex-best { font-size: 10px; color: #555; letter-spacing: .06em; }
-  .set-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-  .set-chip {
-    font-size: 12px; color: #777; background: #0a0a0a;
-    border: 1px solid var(--b1); padding: 3px 11px;
-  }
+  .set-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .set-chip { font-size: 12px; color: #777; background: #0a0a0a; border: 1px solid var(--b1); padding: 3px 11px; }
 
   /* ── LOG FORM ── */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
@@ -138,68 +75,51 @@
   .form-group { display: flex; flex-direction: column; gap: 14px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label { font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #555; }
-  input[type=text], input[type=number], select {
-    background: var(--bg3); border: 1px solid var(--b3);
-    color: var(--t1); padding: 10px 13px; font-size: 14px;
-    outline: none; width: 100%; transition: border-color .12s; appearance: none;
-  }
+  input[type=text], input[type=number], select { background: var(--bg3); border: 1px solid var(--b3); color: var(--t1); padding: 10px 13px; font-size: 14px; outline: none; width: 100%; transition: border-color .12s; appearance: none; }
   input:focus, select:focus { border-color: var(--t1); }
   select option { background: #111; color: #fff; }
   .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .btn-ghost {
-    background: transparent; border: 1px solid var(--b3);
-    color: var(--t2); font-size: 10px; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase;
-    padding: 11px 22px; cursor: pointer; transition: all .12s; width: 100%;
+
+  /* file upload */
+  .file-label {
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    border: 1px dashed var(--b3); padding: 10px 14px;
+    color: var(--t3); font-size: 11px; letter-spacing: .08em;
+    transition: all .12s;
   }
+  .file-label:hover { border-color: var(--t2); color: var(--t2); }
+  .file-label.has-file { border-color: var(--t1); color: var(--t1); border-style: solid; }
+  .file-preview-img { width: 100%; max-height: 110px; object-fit: cover; border: 1px solid var(--b1); display: none; margin-top: 4px; }
+
+  /* media in history */
+  .media-thumb { width: 56px; height: 56px; object-fit: cover; border: 1px solid var(--b2); cursor: pointer; vertical-align: middle; }
+  .media-file-link { font-size: 10px; color: var(--t3); text-decoration: none; border: 1px solid var(--b2); padding: 3px 9px; letter-spacing: .06em; white-space: nowrap; }
+  .media-file-link:hover { color: var(--t1); border-color: var(--t1); }
+
+  .btn-ghost { background: transparent; border: 1px solid var(--b3); color: var(--t2); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 11px 22px; cursor: pointer; transition: all .12s; width: 100%; }
   .btn-ghost:hover:not(:disabled) { color: var(--t1); border-color: var(--t1); }
   .btn-ghost:disabled { opacity: .3; cursor: not-allowed; }
-  .btn-primary {
-    background: var(--t1); color: var(--bg);
-    font-size: 11px; font-weight: 700;
-    letter-spacing: .12em; text-transform: uppercase;
-    padding: 12px 28px; border: none; cursor: pointer; transition: opacity .12s;
-  }
+  .btn-primary { background: var(--t1); color: var(--bg); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 12px 28px; border: none; cursor: pointer; transition: opacity .12s; }
   .btn-primary:hover:not(:disabled) { opacity: .85; }
   .btn-primary:disabled { opacity: .25; cursor: not-allowed; }
-  .btn-danger {
-    background: transparent; color: #555; font-size: 10px;
-    letter-spacing: .06em; text-transform: uppercase;
-    border: 1px solid #222; padding: 5px 11px; cursor: pointer; transition: all .12s;
-  }
+  .btn-danger { background: transparent; color: #555; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid #222; padding: 5px 11px; cursor: pointer; transition: all .12s; }
   .btn-danger:hover { color: #ccc; border-color: #666; }
 
-  /* sets panel */
   .sets-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .sets-empty {
-    border: 1px dashed var(--b1); padding: 32px 20px;
-    text-align: center; color: var(--t3); font-size: 12px; letter-spacing: .06em;
-  }
+  .sets-empty { border: 1px dashed var(--b1); padding: 32px 20px; text-align: center; color: var(--t3); font-size: 12px; letter-spacing: .06em; }
   .set-rows { display: flex; flex-direction: column; gap: 1px; background: var(--b1); }
-  .set-group-head {
-    padding: 9px 15px; font-size: 11px; font-weight: 700;
-    letter-spacing: .06em; color: #ccc; background: #0d0d0d;
-    border-bottom: 1px solid var(--b1); display: flex; justify-content: space-between;
-  }
-  .set-row {
-    background: var(--bg); padding: 8px 15px;
-    display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #0d0d0d;
-  }
+  .set-group-head { padding: 9px 15px; font-size: 11px; font-weight: 700; letter-spacing: .06em; color: #ccc; background: #0d0d0d; border-bottom: 1px solid var(--b1); display: flex; justify-content: space-between; }
+  .set-row { background: var(--bg); padding: 8px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #0d0d0d; }
   .set-num { color: var(--t3); font-size: 10px; width: 18px; text-align: center; }
   .set-info { font-size: 13px; color: #888; flex: 1; }
+  .set-has-media { font-size: 9px; color: #555; letter-spacing: .06em; border: 1px solid #222; padding: 2px 7px; }
 
-  /* finish bar */
-  .finish-bar {
-    border-top: 1px solid var(--b1); padding-top: 22px;
-    display: flex; align-items: center; gap: 16px;
-  }
+  .finish-bar { border-top: 1px solid var(--b1); padding-top: 22px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
   .save-msg { font-size: 12px; color: #555; letter-spacing: .08em; }
 
-  /* empty state */
   .empty { color: var(--t3); font-size: 13px; padding: 56px 0; text-align: center; border-top: 1px solid var(--b1); }
   .empty a { color: #666; }
 
-  /* scrollbar */
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-track { background: #0a0a0a; }
   ::-webkit-scrollbar-thumb { background: var(--b2); }
@@ -207,7 +127,6 @@
 </head>
 <body>
 
-<!-- ── NAV ── -->
 <nav>
   <div class="brand" onclick="showPage('dashboard')">
     <svg width="28" height="32" viewBox="0 0 100 115" fill="none">
@@ -225,10 +144,8 @@
 
 <main>
 
-  <!-- ════════════ DASHBOARD ════════════ -->
+  <!-- ══ DASHBOARD ══ -->
   <div class="page active" id="page-dashboard">
-
-    <!-- hero -->
     <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;">
       <div>
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
@@ -246,14 +163,12 @@
       <button class="btn-primary" onclick="showPage('log')">+ Log Workout</button>
     </div>
 
-    <!-- stats -->
     <div class="stat-strip">
       <div class="stat-cell"><div class="stat-label">Total Sessions</div><div class="stat-val" id="stat-total">—</div></div>
       <div class="stat-cell"><div class="stat-label">This Week</div><div class="stat-val" id="stat-week">—</div></div>
       <div class="stat-cell"><div class="stat-label">Push / Pull / Legs</div><div class="stat-val" id="stat-ppl">—</div></div>
     </div>
 
-    <!-- recent sessions -->
     <div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
         <div class="label">Recent Sessions</div>
@@ -268,15 +183,13 @@
     </div>
   </div>
 
-  <!-- ════════════ LOG ════════════ -->
+  <!-- ══ LOG ══ -->
   <div class="page" id="page-log">
-
     <div class="page-header">
       <div class="label">Log Workout</div>
       <h1 class="page-title">NEW SESSION</h1>
     </div>
 
-    <!-- session type -->
     <div>
       <div class="label" style="margin-bottom:12px;">Session Type</div>
       <div class="filter-bar">
@@ -320,6 +233,17 @@
           </div>
         </div>
 
+        <!-- ── FILE UPLOAD ── -->
+        <div class="field">
+          <label>Media (optional)</label>
+          <label class="file-label" id="file-label" for="inp-file">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span id="file-name-display">Attach image / video / PDF</span>
+          </label>
+          <input type="file" id="inp-file" accept="image/*,video/*,application/pdf" style="display:none" onchange="onFileChange()" />
+          <img id="file-preview-img" class="file-preview-img" alt="preview" />
+        </div>
+
         <button class="btn-ghost" id="btn-add-set" onclick="addSet()" disabled>+ Add Set</button>
       </div>
 
@@ -339,21 +263,18 @@
     </div>
   </div>
 
-  <!-- ════════════ HISTORY ════════════ -->
+  <!-- ══ HISTORY ══ -->
   <div class="page" id="page-history">
-
     <div class="page-header">
       <div class="label">Training Log</div>
       <h1 class="page-title">HISTORY</h1>
     </div>
-
     <div class="filter-bar">
       <button class="filter-btn active" onclick="histFilter('all',this)">All</button>
       <button class="filter-btn" onclick="histFilter('push',this)">Push</button>
       <button class="filter-btn" onclick="histFilter('pull',this)">Pull</button>
       <button class="filter-btn" onclick="histFilter('legs',this)">Legs</button>
     </div>
-
     <div id="hist-sessions"></div>
   </div>
 
@@ -366,13 +287,16 @@ const SUPA_URL = 'https://enzopvdeyxichitmoosn.supabase.co'
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuem9wdmRleXhpY2hpdG1vb3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MTU5MTYsImV4cCI6MjA5NzI5MTkxNn0._S-oNfp3zdD62kzw3QvbKxlsNWuSy679VNV3_Ng_9YE'
 const db = createClient(SUPA_URL, SUPA_KEY)
 
+const BUCKET = 'exercises'
+
 // ── State ──────────────────────────────────────────────────────────────────
-let exercises    = []
-let allSessions  = []
-let pendingSets  = []       // { exerciseName, muscleTargeted, weight, reps, setNumber }
-let currentCat   = 'push'
+let exercises         = []
+let allSessions       = []
+let pendingSets       = []   // { exerciseName, muscleTargeted, weight, reps, setNumber, file? }
+let currentCat        = 'push'
 let dashCurrentFilter = 'all'
 let histCurrentFilter = 'all'
+let pendingFile       = null  // File object staged for next addSet()
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 async function boot() {
@@ -391,7 +315,7 @@ async function loadSessions() {
   allSessions = data ?? []
 }
 
-// ── Navigation ─────────────────────────────────────────────────────────────
+// ── Nav ────────────────────────────────────────────────────────────────────
 window.showPage = function(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
@@ -401,7 +325,7 @@ window.showPage = function(name) {
   if (name === 'history')   renderHistory()
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────
+// ── Dashboard ──────────────────────────────────────────────────────────────
 window.dashFilter = function(cat, btn) {
   dashCurrentFilter = cat
   document.querySelectorAll('#page-dashboard .filter-btn').forEach(b => b.classList.remove('active'))
@@ -411,10 +335,9 @@ window.dashFilter = function(cat, btn) {
 
 function renderDashboard() {
   const today = todayStr()
-  const todayCount = allSessions.filter(s => s.session_date === today).length
+  const n = allSessions.filter(s => s.session_date === today).length
   document.getElementById('dash-today-msg').textContent =
-    todayCount ? `${todayCount} session${todayCount > 1 ? 's' : ''} logged today` : 'No workout logged today. Begin.'
-
+    n ? `${n} session${n > 1 ? 's' : ''} logged today` : 'No workout logged today. Begin.'
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7)
   document.getElementById('stat-total').textContent = allSessions.length
   document.getElementById('stat-week').textContent  = allSessions.filter(s => new Date(s.session_date) >= weekAgo).length
@@ -424,34 +347,26 @@ function renderDashboard() {
 }
 
 function renderSessionList() {
-  const filtered = dashCurrentFilter === 'all'
-    ? allSessions
-    : allSessions.filter(s => s.category === dashCurrentFilter)
+  const filtered = dashCurrentFilter === 'all' ? allSessions : allSessions.filter(s => s.category === dashCurrentFilter)
   const el = document.getElementById('dash-sessions')
-
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty">No sessions found. <a onclick="showPage('log')" style="cursor:pointer;">Log one now.</a></div>`
-    return
-  }
-
+  if (!filtered.length) { el.innerHTML = `<div class="empty">No sessions found. <a onclick="showPage('log')" style="cursor:pointer;">Log one now.</a></div>`; return }
   el.innerHTML = `<div class="session-list">${filtered.slice(0,20).map(sessionRowHTML).join('')}</div>`
   el.querySelectorAll('.btn-danger').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('Delete this session?')) return
       await db.from('workout_sessions').delete().eq('id', btn.dataset.id)
-      await loadSessions()
-      renderDashboard()
+      await loadSessions(); renderDashboard()
     })
   })
 }
 
 function sessionRowHTML(s) {
-  const sets    = s.workout_sets ?? []
-  const volume  = sets.reduce((a, x) => a + (x.weight || 0) * x.reps, 0)
-  const exNames = [...new Set(sets.map(x => x.exercise_name))]
-  const date    = new Date(s.session_date + 'T00:00:00')
-  const tags    = exNames.slice(0,4).map(n => `<span class="ex-tag">${n}</span>`).join('')
-  const more    = exNames.length > 4 ? `<span style="font-size:11px;color:var(--t3);">+${exNames.length-4} more</span>` : ''
+  const sets   = s.workout_sets ?? []
+  const volume = sets.reduce((a, x) => a + (x.weight || 0) * x.reps, 0)
+  const names  = [...new Set(sets.map(x => x.exercise_name))]
+  const date   = new Date(s.session_date + 'T00:00:00')
+  const tags   = names.slice(0,4).map(n => `<span class="ex-tag">${n}</span>`).join('')
+  const more   = names.length > 4 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-4} more</span>` : ''
   return `
     <div class="session-row">
       <div class="session-date">
@@ -468,36 +383,67 @@ function sessionRowHTML(s) {
     </div>`
 }
 
-// ── Log ───────────────────────────────────────────────────────────────────
+// ── Log ────────────────────────────────────────────────────────────────────
 window.setCategory = function(cat, btn) {
   currentCat = cat
   document.querySelectorAll('#page-log .filter-btn').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
-  pendingSets = []
-  populateExerciseSelect()
-  renderSets()
+  pendingSets = []; clearFileInput()
+  populateExerciseSelect(); renderSets()
 }
 
 function populateExerciseSelect() {
   const sel = document.getElementById('ex-select')
-  const filtered = exercises.filter(e => e.category === currentCat)
   sel.innerHTML = `<option value="">— Select exercise —</option>` +
-    filtered.map(e => `<option value="${e.id}" data-muscle="${e.muscle_targeted}">${e.name} (${e.muscle_targeted})</option>`).join('') +
+    exercises.filter(e => e.category === currentCat)
+      .map(e => `<option value="${e.id}" data-muscle="${e.muscle_targeted}">${e.name} (${e.muscle_targeted})</option>`).join('') +
     `<option value="__custom__">+ Custom exercise</option>`
   document.getElementById('custom-fields').style.display = 'none'
   updateAddBtn()
 }
 
 window.onExerciseChange = function() {
-  const v = document.getElementById('ex-select').value
-  document.getElementById('custom-fields').style.display = v === '__custom__' ? 'flex' : 'none'
+  document.getElementById('custom-fields').style.display =
+    document.getElementById('ex-select').value === '__custom__' ? 'flex' : 'none'
   updateAddBtn()
 }
 
+// ── File handling ──────────────────────────────────────────────────────────
+window.onFileChange = function() {
+  const input = document.getElementById('inp-file')
+  const file  = input.files[0]
+  const label = document.getElementById('file-label')
+  const nameEl = document.getElementById('file-name-display')
+  const preview = document.getElementById('file-preview-img')
+
+  if (!file) { pendingFile = null; clearFileInput(); return }
+
+  pendingFile = file
+  nameEl.textContent = file.name
+  label.classList.add('has-file')
+
+  if (file.type.startsWith('image/')) {
+    const url = URL.createObjectURL(file)
+    preview.src = url
+    preview.style.display = 'block'
+  } else {
+    preview.style.display = 'none'
+  }
+}
+
+function clearFileInput() {
+  pendingFile = null
+  document.getElementById('inp-file').value = ''
+  document.getElementById('file-name-display').textContent = 'Attach image / video / PDF'
+  document.getElementById('file-label').classList.remove('has-file')
+  document.getElementById('file-preview-img').style.display = 'none'
+  document.getElementById('file-preview-img').src = ''
+}
+
 function updateAddBtn() {
-  const v    = document.getElementById('ex-select').value
-  const reps = document.getElementById('inp-reps').value
-  const ok   = v && reps && (v !== '__custom__' || document.getElementById('custom-name').value.trim())
+  const v  = document.getElementById('ex-select').value
+  const r  = document.getElementById('inp-reps').value
+  const ok = v && r && (v !== '__custom__' || document.getElementById('custom-name').value.trim())
   document.getElementById('btn-add-set').disabled = !ok
 }
 
@@ -509,8 +455,8 @@ window.addSet = function() {
   const sel    = document.getElementById('ex-select')
   const reps   = document.getElementById('inp-reps').value
   const weight = document.getElementById('inp-weight').value
-
   let name, muscle
+
   if (sel.value === '__custom__') {
     name   = document.getElementById('custom-name').value.trim()
     muscle = document.getElementById('custom-muscle').value.trim() || '—'
@@ -521,10 +467,15 @@ window.addSet = function() {
   }
 
   const setNum = pendingSets.filter(s => s.exerciseName === name).length + 1
-  pendingSets.push({ exerciseName: name, muscleTargeted: muscle, weight, reps: parseInt(reps), setNumber: setNum })
+  pendingSets.push({
+    exerciseName: name, muscleTargeted: muscle,
+    weight, reps: parseInt(reps), setNumber: setNum,
+    file: pendingFile   // attach staged file (may be null)
+  })
 
   document.getElementById('inp-weight').value = ''
   document.getElementById('inp-reps').value   = ''
+  clearFileInput()
   updateAddBtn()
   renderSets()
 }
@@ -534,12 +485,8 @@ function renderSets() {
   document.getElementById('set-count-label').textContent = `${pendingSets.length} sets`
   document.getElementById('btn-finish').disabled = pendingSets.length === 0
 
-  if (!pendingSets.length) {
-    el.innerHTML = `<div class="sets-empty">No sets added yet</div>`
-    return
-  }
+  if (!pendingSets.length) { el.innerHTML = `<div class="sets-empty">No sets added yet</div>`; return }
 
-  // group by exercise
   const groups = {}
   pendingSets.forEach((s, i) => {
     if (!groups[s.exerciseName]) groups[s.exerciseName] = []
@@ -556,7 +503,8 @@ function renderSets() {
         ${rows.map(r => `
           <div class="set-row">
             <span class="set-num">${r.setNumber}</span>
-            <span class="set-info">${r.weight ? r.weight + ' kg' : 'BW'} × ${r.reps}</span>
+            <span class="set-info">${r.weight ? r.weight+' kg' : 'BW'} × ${r.reps}</span>
+            ${r.file ? `<span class="set-has-media">📎 ${r.file.name.length > 14 ? r.file.name.slice(0,12)+'…' : r.file.name}</span>` : ''}
             <button class="btn-danger" data-idx="${r.idx}">✕</button>
           </div>`).join('')}
       </div>`).join('') +
@@ -565,17 +513,25 @@ function renderSets() {
   el.querySelectorAll('.btn-danger').forEach(btn => {
     btn.addEventListener('click', () => {
       pendingSets.splice(parseInt(btn.dataset.idx), 1)
-      // re-number
       const counts = {}
-      pendingSets.forEach(s => {
-        counts[s.exerciseName] = (counts[s.exerciseName] || 0) + 1
-        s.setNumber = counts[s.exerciseName]
-      })
+      pendingSets.forEach(s => { counts[s.exerciseName] = (counts[s.exerciseName] || 0) + 1; s.setNumber = counts[s.exerciseName] })
       renderSets()
     })
   })
 }
 
+// ── Upload file to Supabase Storage ────────────────────────────────────────
+async function uploadFile(sessionId, set) {
+  if (!set.file) return null
+  const ext  = set.file.name.split('.').pop()
+  const path = `${sessionId}/${set.exerciseName.replace(/\s+/g,'-')}-set${set.setNumber}-${Date.now()}.${ext}`
+  const { error } = await db.storage.from(BUCKET).upload(path, set.file, { upsert: true })
+  if (error) { console.error('Upload error:', error.message); return null }
+  const { data } = db.storage.from(BUCKET).getPublicUrl(path)
+  return data.publicUrl
+}
+
+// ── Finish session ─────────────────────────────────────────────────────────
 window.finishSession = async function() {
   if (!pendingSets.length) return
   document.getElementById('btn-finish').disabled = true
@@ -592,15 +548,23 @@ window.finishSession = async function() {
     return
   }
 
-  await db.from('workout_sets').insert(pendingSets.map(s => ({
-    session_id:      sess.id,
-    exercise_name:   s.exerciseName,
-    muscle_targeted: s.muscleTargeted,
-    category:        currentCat,
-    weight:          s.weight ? parseFloat(s.weight) : null,
-    reps:            s.reps,
-    set_number:      s.setNumber,
-  })))
+  // Upload files & build rows
+  document.getElementById('save-msg').textContent = 'Uploading media...'
+  const rows = await Promise.all(pendingSets.map(async s => {
+    const mediaUrl = await uploadFile(sess.id, s)
+    return {
+      session_id:      sess.id,
+      exercise_name:   s.exerciseName,
+      muscle_targeted: s.muscleTargeted,
+      category:        currentCat,
+      weight:          s.weight ? parseFloat(s.weight) : null,
+      reps:            s.reps,
+      set_number:      s.setNumber,
+      media_url:       mediaUrl,
+    }
+  }))
+
+  await db.from('workout_sets').insert(rows)
 
   pendingSets = []
   renderSets()
@@ -618,21 +582,13 @@ window.histFilter = function(cat, btn) {
 }
 
 function renderHistory() {
-  const filtered = histCurrentFilter === 'all'
-    ? allSessions
-    : allSessions.filter(s => s.category === histCurrentFilter)
+  const filtered = histCurrentFilter === 'all' ? allSessions : allSessions.filter(s => s.category === histCurrentFilter)
   const el = document.getElementById('hist-sessions')
+  if (!filtered.length) { el.innerHTML = `<div class="empty">No sessions found.</div>`; return }
 
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty">No sessions found.</div>`
-    return
-  }
-
-  // group by month
   const months = {}
   filtered.forEach(s => {
-    const d   = new Date(s.session_date + 'T00:00:00')
-    const key = d.toLocaleDateString('en-US', { year:'numeric', month:'long' })
+    const key = new Date(s.session_date + 'T00:00:00').toLocaleDateString('en-US', { year:'numeric', month:'long' })
     if (!months[key]) months[key] = []
     months[key].push(s)
   })
@@ -642,9 +598,7 @@ function renderHistory() {
       <div class="label" style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--b1);">
         ${month} · ${sessions.length} session${sessions.length > 1 ? 's' : ''}
       </div>
-      <div class="session-list" style="gap:1px;">
-        ${sessions.map(histSessionHTML).join('')}
-      </div>
+      <div class="session-list" style="gap:1px;">${sessions.map(histSessionHTML).join('')}</div>
     </div>`).join('')
 
   el.querySelectorAll('.session-toggle').forEach(btn => {
@@ -656,31 +610,41 @@ function renderHistory() {
   })
 
   el.querySelectorAll('.btn-danger[data-del]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation()
       if (!confirm('Delete this session?')) return
       await db.from('workout_sessions').delete().eq('id', btn.dataset.del)
-      await loadSessions()
-      renderHistory()
+      await loadSessions(); renderHistory()
     })
   })
+}
+
+function mediaHTML(set) {
+  if (!set.media_url) return ''
+  const url = set.media_url
+  const isImage = /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url)
+  const isVideo = /\.(mp4|mov|webm)(\?|$)/i.test(url)
+  if (isImage) return `<a href="${url}" target="_blank"><img src="${url}" class="media-thumb" title="View image" /></a>`
+  if (isVideo) return `<a href="${url}" target="_blank" class="media-file-link">▶ Video</a>`
+  return `<a href="${url}" target="_blank" class="media-file-link">📎 File</a>`
 }
 
 function histSessionHTML(s) {
   const sets   = s.workout_sets ?? []
   const volume = sets.reduce((a, x) => a + (x.weight || 0) * x.reps, 0)
   const date   = new Date(s.session_date + 'T00:00:00')
-  const exNames = [...new Set(sets.map(x => x.exercise_name))]
-  const tags   = exNames.slice(0,3).map(n => `<span class="ex-tag">${n}</span>`).join('')
-  const more   = exNames.length > 3 ? `<span style="font-size:11px;color:var(--t3);">+${exNames.length-3}</span>` : ''
+  const names  = [...new Set(sets.map(x => x.exercise_name))]
+  const tags   = names.slice(0,3).map(n => `<span class="ex-tag">${n}</span>`).join('')
+  const more   = names.length > 3 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-3}</span>` : ''
 
-  // group sets by exercise for detail
   const groups = {}
   sets.forEach(s => { if (!groups[s.exercise_name]) groups[s.exercise_name] = []; groups[s.exercise_name].push(s) })
 
   const detailHTML = Object.entries(groups).map(([name, exSets]) => {
-    const best = exSets.reduce((b, x) => (!b.weight || (x.weight||0) > (b.weight||0) ? x : b), exSets[0])
-    const chips = exSets.map(x => `<span class="set-chip">${x.weight ? x.weight+'kg' : 'BW'} × ${x.reps}</span>`).join('')
+    const best  = exSets.reduce((b, x) => (!b.weight || (x.weight||0) > (b.weight||0) ? x : b), exSets[0])
+    const chips = exSets.map(x => `
+      <span class="set-chip">${x.weight ? x.weight+'kg' : 'BW'} × ${x.reps}</span>
+      ${mediaHTML(x)}`).join('')
     return `
       <div class="ex-block">
         <div class="ex-block-head">
@@ -715,7 +679,6 @@ function histSessionHTML(s) {
     </div>`
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 function todayStr() { return new Date().toISOString().split('T')[0] }
 
 boot()
