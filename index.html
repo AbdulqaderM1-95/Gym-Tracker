@@ -33,6 +33,17 @@
   .btn-manage { background: none; border: 1px solid #333; color: #555; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 5px 12px; cursor: pointer; margin-right: 6px; transition: all .12s; }
   .btn-manage:hover { color: #fff; border-color: #fff; }
 
+  /* ── PAYMENT RESULT ── */
+  .payment-result { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 0; }
+  .payment-result.active { display: flex; }
+  .pr-icon { font-size: 52px; margin-bottom: 20px; }
+  .pr-label { font-size: 9px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; margin-bottom: 10px; }
+  .pr-title { font-size: 30px; font-weight: 900; letter-spacing: -.02em; margin-bottom: 8px; text-align: center; }
+  .pr-sub { font-size: 13px; color: #555; letter-spacing: .04em; margin-bottom: 36px; text-align: center; max-width: 320px; line-height: 1.6; }
+  .pr-btn { background: #fff; color: #000; border: none; font-size: 11px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; padding: 14px 32px; cursor: pointer; margin-bottom: 12px; }
+  .pr-btn-sec { background: none; border: none; color: #444; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; padding: 6px; }
+  .pr-btn-sec:hover { color: #888; }
+
   /* ── UPGRADE MODAL ── */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 999; display: none; align-items: center; justify-content: center; }
   .modal-overlay.active { display: flex; }
@@ -605,6 +616,16 @@ function updatePlanUI() {
   document.getElementById('btn-nav-manage').style.display  = isPro ? '' : 'none'
 }
 
+function showPaymentResult({ icon, label, title, sub, mainBtn = 'Continue', showRetry = false }) {
+  document.getElementById('pr-icon').textContent    = icon
+  document.getElementById('pr-label').textContent   = label
+  document.getElementById('pr-title').textContent   = title
+  document.getElementById('pr-sub').textContent     = sub
+  document.getElementById('pr-btn-main').textContent = mainBtn
+  document.getElementById('pr-btn-sec').style.display = showRetry ? '' : 'none'
+  document.getElementById('payment-result').classList.add('active')
+}
+
 async function handlePaymentReturn() {
   const params    = new URLSearchParams(window.location.search)
   const payment   = params.get('payment')
@@ -614,36 +635,73 @@ async function handlePaymentReturn() {
   history.replaceState({}, '', window.location.pathname)
 
   if (payment === 'cancel') {
-    showToast('Payment cancelled. Upgrade anytime to unlock Pro.')
+    showPaymentResult({
+      icon    : '✕',
+      label   : 'Payment cancelled',
+      title   : 'No charge made.',
+      sub     : 'You can upgrade to Pro anytime. All your data is safe.',
+      mainBtn : 'Back to App',
+      showRetry: true,
+    })
     return
   }
 
   if (payment !== 'success') return
-  history.replaceState({}, '', window.location.pathname)
 
   if (!paymentId) {
-    // Fallback: just reload profile (manual payment confirmation)
     const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
     currentProfile = data; updatePlanUI()
-    showToast('Payment received! Refresh if Pro features are not active yet.')
+    showPaymentResult({
+      icon  : '✓',
+      label : 'Payment received',
+      title : 'You\'re now Pro.',
+      sub   : 'All features are unlocked for 30 days.',
+    })
     return
   }
 
-  showToast('Verifying payment...')
-  const { data: { session } } = await db.auth.getSession()
-  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/verify-payment', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ payment_id: paymentId }),
+  showPaymentResult({
+    icon  : '…',
+    label : 'Verifying payment',
+    title : 'One moment.',
+    sub   : 'Confirming your payment with MyFatoorah…',
   })
-  const json = await res.json()
 
-  if (json.verified) {
-    const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
-    currentProfile = data; updatePlanUI()
-    showToast('Welcome to Pro! All features unlocked.')
-  } else {
-    showToast('Payment pending — refresh in a moment.')
+  try {
+    const { data: { session } } = await db.auth.getSession()
+    const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/verify-payment', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payment_id: paymentId }),
+    })
+    const json = await res.json()
+
+    if (json.verified) {
+      const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
+      currentProfile = data; updatePlanUI()
+      showPaymentResult({
+        icon  : '✓',
+        label : 'Payment successful',
+        title : 'Welcome to Pro.',
+        sub   : `All features unlocked for 30 days. Expires ${new Date(json.pro_expires_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}.`,
+      })
+    } else {
+      showPaymentResult({
+        icon    : '?',
+        label   : 'Payment pending',
+        title   : 'Still processing.',
+        sub     : 'Your payment was received but not confirmed yet. Refresh the app in a moment.',
+        mainBtn : 'OK',
+      })
+    }
+  } catch {
+    showPaymentResult({
+      icon    : '!',
+      label   : 'Verification error',
+      title   : 'Could not verify.',
+      sub     : 'If your payment went through, refresh the app — your Pro access will appear shortly.',
+      mainBtn : 'OK',
+    })
   }
 }
 
@@ -1158,6 +1216,16 @@ async function summarizeSession(sessionId, btn) {
 
 function todayStr() { return new Date().toISOString().split('T')[0] }
 </script>
+
+<!-- ══ PAYMENT RESULT ══ -->
+<div class="payment-result" id="payment-result">
+  <div class="pr-icon" id="pr-icon"></div>
+  <div class="pr-label" id="pr-label"></div>
+  <div class="pr-title" id="pr-title"></div>
+  <div class="pr-sub"   id="pr-sub"></div>
+  <button class="pr-btn"     id="pr-btn-main" onclick="document.getElementById('payment-result').classList.remove('active')">Continue</button>
+  <button class="pr-btn-sec" id="pr-btn-sec"  style="display:none" onclick="openUpgradeModal();document.getElementById('payment-result').classList.remove('active')">Try Again</button>
+</div>
 
 <!-- ══ UPGRADE MODAL ══ -->
 <div class="modal-overlay" id="upgrade-modal">
