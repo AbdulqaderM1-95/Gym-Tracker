@@ -610,6 +610,14 @@ async function handlePaymentReturn() {
   const payment   = params.get('payment')
   const paymentId = params.get('paymentId')
 
+  if (!payment) return
+  history.replaceState({}, '', window.location.pathname)
+
+  if (payment === 'cancel') {
+    showToast('Payment cancelled. Upgrade anytime to unlock Pro.')
+    return
+  }
+
   if (payment !== 'success') return
   history.replaceState({}, '', window.location.pathname)
 
