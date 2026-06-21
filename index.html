@@ -596,24 +596,46 @@ async function boot() {
 }
 
 function updatePlanUI() {
-  const isPro = currentProfile?.is_premium ?? false
-  const badge = document.getElementById('plan-badge')
+  const expires = currentProfile?.pro_expires_at ? new Date(currentProfile.pro_expires_at) : null
+  const isPro   = (currentProfile?.is_premium ?? false) && (!expires || expires > new Date())
+  const badge   = document.getElementById('plan-badge')
   badge.textContent = isPro ? 'PRO' : 'FREE'
   badge.className   = isPro ? 'plan-badge pro' : 'plan-badge free'
   document.getElementById('btn-nav-upgrade').style.display = isPro ? 'none' : ''
   document.getElementById('btn-nav-manage').style.display  = isPro ? '' : 'none'
 }
 
-function handlePaymentReturn() {
-  const params = new URLSearchParams(window.location.search)
-  if (params.get('payment') === 'success') {
-    history.replaceState({}, '', window.location.pathname)
-    setTimeout(async () => {
-      const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
-      currentProfile = data
-      updatePlanUI()
-      showToast('Welcome to Pro! All features unlocked.')
-    }, 2000) // give webhook a moment
+async function handlePaymentReturn() {
+  const params    = new URLSearchParams(window.location.search)
+  const payment   = params.get('payment')
+  const paymentId = params.get('paymentId')
+
+  if (payment !== 'success') return
+  history.replaceState({}, '', window.location.pathname)
+
+  if (!paymentId) {
+    // Fallback: just reload profile (manual payment confirmation)
+    const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
+    currentProfile = data; updatePlanUI()
+    showToast('Payment received! Refresh if Pro features are not active yet.')
+    return
+  }
+
+  showToast('Verifying payment...')
+  const { data: { session } } = await db.auth.getSession()
+  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/verify-payment', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ payment_id: paymentId }),
+  })
+  const json = await res.json()
+
+  if (json.verified) {
+    const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
+    currentProfile = data; updatePlanUI()
+    showToast('Welcome to Pro! All features unlocked.')
+  } else {
+    showToast('Payment pending — refresh in a moment.')
   }
 }
 
@@ -648,19 +670,10 @@ window.handleUpgrade = async function() {
   else showToast('Error: ' + (json.error ?? 'Unknown'))
 }
 
-window.handleManagePlan = async function() {
-  const btn = document.getElementById('btn-nav-manage')
-  btn.textContent = 'Loading...'
-  const { data: { session } } = await db.auth.getSession()
-  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/customer-portal', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
-  })
-  const json = await res.json()
-  btn.textContent = 'Manage Plan'
-  if (json.url) window.location.href = json.url
-  else showToast('Error: ' + (json.error ?? 'Unknown'))
+window.handleManagePlan = function() {
+  const expires = currentProfile?.pro_expires_at
+  const date    = expires ? new Date(expires).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : '—'
+  showToast(`Pro active until ${date}. Pay again to extend 30 more days.`)
 }
 
 async function loadSessions() {
@@ -1143,7 +1156,7 @@ function todayStr() { return new Date().toISOString().split('T')[0] }
   <div class="modal-box">
     <div class="modal-label">Fortress Pro</div>
     <div class="modal-title">Go Pro</div>
-    <div class="modal-price">$4.99 / month &nbsp;·&nbsp; Cancel anytime</div>
+    <div class="modal-price">5 KWD / month &nbsp;·&nbsp; Renew anytime</div>
     <ul class="modal-features">
       <li>Unlimited AI session summaries</li>
       <li>Full workout history (free = last 30 days)</li>
