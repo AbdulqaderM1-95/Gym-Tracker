@@ -44,6 +44,23 @@
   .pr-btn-sec { background: none; border: none; color: #444; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; padding: 6px; }
   .pr-btn-sec:hover { color: #888; }
 
+  /* ── MANAGE PLAN MODAL ── */
+  .manage-modal { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 999; display: none; align-items: center; justify-content: center; }
+  .manage-modal.active { display: flex; }
+  .manage-box { background: #0a0a0a; border: 1px solid #222; max-width: 380px; width: 90%; padding: 32px; }
+  .manage-plan-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #111; padding-bottom: 18px; margin-bottom: 20px; }
+  .manage-plan-name { font-size: 14px; font-weight: 900; letter-spacing: .06em; }
+  .manage-expires { font-size: 10px; color: #555; letter-spacing: .06em; margin-top: 3px; }
+  .manage-actions { display: flex; flex-direction: column; gap: 8px; }
+  .btn-renew  { background: #fff; color: #000; border: none; font-size: 10px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; padding: 12px; cursor: pointer; transition: opacity .12s; }
+  .btn-renew:hover { opacity: .85; }
+  .btn-renew:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-cancel-plan { background: none; border: 1px solid #1a1a1a; color: #444; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 11px; cursor: pointer; transition: all .12s; }
+  .btn-cancel-plan:hover { border-color: #555; color: #888; }
+  .btn-cancel-plan:disabled { opacity: .4; cursor: not-allowed; }
+  .manage-close { background: none; border: none; color: #333; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; display: block; width: 100%; text-align: center; padding: 10px 0 0; }
+  .manage-close:hover { color: #666; }
+
   /* ── UPGRADE MODAL ── */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 999; display: none; align-items: center; justify-content: center; }
   .modal-overlay.active { display: flex; }
@@ -739,7 +756,43 @@ window.handleUpgrade = async function() {
 window.handleManagePlan = function() {
   const expires = currentProfile?.pro_expires_at
   const date    = expires ? new Date(expires).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : '—'
-  showToast(`Pro active until ${date}. Pay again to extend 30 more days.`)
+  document.getElementById('manage-expires-text').textContent = `Active until ${date}`
+  document.getElementById('btn-renew').disabled = false
+  document.getElementById('btn-renew').textContent = 'Renew — 5 KWD / 30 days'
+  document.getElementById('btn-cancel-plan').disabled = false
+  document.getElementById('btn-cancel-plan').textContent = 'Cancel Plan'
+  document.getElementById('manage-modal').classList.add('active')
+}
+
+window.handleRenewPlan = async function() {
+  const btn = document.getElementById('btn-renew')
+  btn.disabled = true; btn.textContent = 'Redirecting...'
+  const { data: { session } } = await db.auth.getSession()
+  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/create-checkout', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  })
+  const json = await res.json()
+  btn.disabled = false; btn.textContent = 'Renew — 5 KWD / 30 days'
+  if (json.url) window.location.href = json.url
+  else { btn.textContent = 'Error — try again' }
+}
+
+window.handleCancelPlan = async function() {
+  if (!confirm('Cancel your Pro plan? You will lose access immediately.')) return
+  const btn = document.getElementById('btn-cancel-plan')
+  btn.disabled = true; btn.textContent = 'Cancelling...'
+  const { error } = await db.from('profiles').update({
+    is_premium: false,
+    subscription_status: 'cancelled',
+  }).eq('id', currentUser.id)
+  if (error) { btn.disabled = false; btn.textContent = 'Error — try again'; return }
+  currentProfile.is_premium = false
+  currentProfile.subscription_status = 'cancelled'
+  updatePlanUI()
+  document.getElementById('manage-modal').classList.remove('active')
+  showToast('Plan cancelled. You are now on the Free plan.')
 }
 
 async function loadSessions() {
@@ -1225,6 +1278,25 @@ function todayStr() { return new Date().toISOString().split('T')[0] }
   <div class="pr-sub"   id="pr-sub"></div>
   <button class="pr-btn"     id="pr-btn-main" onclick="document.getElementById('payment-result').classList.remove('active')">Continue</button>
   <button class="pr-btn-sec" id="pr-btn-sec"  style="display:none" onclick="openUpgradeModal();document.getElementById('payment-result').classList.remove('active')">Try Again</button>
+</div>
+
+<!-- ══ MANAGE PLAN MODAL ══ -->
+<div class="manage-modal" id="manage-modal">
+  <div class="manage-box">
+    <div class="modal-label">Your Plan</div>
+    <div class="manage-plan-row">
+      <div>
+        <div class="manage-plan-name">Fortress Pro</div>
+        <div class="manage-expires" id="manage-expires-text"></div>
+      </div>
+      <span class="plan-badge pro" style="margin:0;">PRO</span>
+    </div>
+    <div class="manage-actions">
+      <button class="btn-renew" id="btn-renew" onclick="handleRenewPlan()">Renew — 5 KWD / 30 days</button>
+      <button class="btn-cancel-plan" id="btn-cancel-plan" onclick="handleCancelPlan()">Cancel Plan</button>
+    </div>
+    <button class="manage-close" onclick="document.getElementById('manage-modal').classList.remove('active')">Close</button>
+  </div>
 </div>
 
 <!-- ══ UPGRADE MODAL ══ -->
