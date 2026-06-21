@@ -25,6 +25,36 @@
   .nav-user { font-size: 10px; color: var(--t3); letter-spacing: .08em; padding: 0 10px; border-right: 1px solid var(--b2); margin-right: 4px; }
   .nav-logout { background: none; border: 1px solid var(--b3); color: var(--t3); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 5px 12px; cursor: pointer; transition: all .12s; }
   .nav-logout:hover { color: var(--t1); border-color: var(--t1); }
+  .plan-badge { font-size: 8px; font-weight: 900; letter-spacing: .18em; padding: 3px 8px; border: 1px solid; margin-right: 6px; }
+  .plan-badge.free { color: #444; border-color: #222; }
+  .plan-badge.pro  { color: #fff; border-color: #fff; background: #111; }
+  .btn-upgrade { background: #fff; color: #000; border: none; font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; margin-right: 6px; transition: opacity .12s; }
+  .btn-upgrade:hover { opacity: .85; }
+  .btn-manage { background: none; border: 1px solid #333; color: #555; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 5px 12px; cursor: pointer; margin-right: 6px; transition: all .12s; }
+  .btn-manage:hover { color: #fff; border-color: #fff; }
+
+  /* ── UPGRADE MODAL ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 999; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: #0a0a0a; border: 1px solid #222; max-width: 420px; width: 90%; padding: 36px; }
+  .modal-label { font-size: 8px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #444; margin-bottom: 10px; }
+  .modal-title { font-size: 24px; font-weight: 900; letter-spacing: -.01em; margin-bottom: 6px; }
+  .modal-price { font-size: 13px; color: #666; margin-bottom: 24px; letter-spacing: .04em; }
+  .modal-features { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 28px; }
+  .modal-features li { font-size: 12px; color: #aaa; letter-spacing: .02em; display: flex; align-items: center; gap: 10px; }
+  .modal-features li::before { content: '✓'; color: #fff; font-weight: 900; font-size: 11px; }
+  .modal-cta { width: 100%; background: #fff; color: #000; border: none; font-size: 11px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity .12s; margin-bottom: 10px; }
+  .modal-cta:hover { opacity: .85; }
+  .modal-cta:disabled { opacity: .4; cursor: not-allowed; }
+  .modal-close { background: none; border: none; color: #444; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; display: block; width: 100%; text-align: center; padding: 6px; }
+  .modal-close:hover { color: #888; }
+
+  /* ── FREE LIMIT BANNER ── */
+  .free-banner { border: 1px solid #1a1a1a; background: #080808; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .free-banner-text { font-size: 11px; color: #555; letter-spacing: .04em; }
+  .free-banner-text strong { color: #888; }
+  .btn-free-upgrade { background: none; border: 1px solid #333; color: #666; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 5px 12px; cursor: pointer; transition: all .12s; white-space: nowrap; }
+  .btn-free-upgrade:hover { color: #fff; border-color: #fff; }
 
   main { max-width: 900px; margin: 0 auto; padding: 36px 24px; }
   .page { display: none; flex-direction: column; gap: 36px; }
@@ -287,6 +317,9 @@
       <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">Dashboard</button>
       <button class="nav-btn" id="nav-log" onclick="showPage('log')">Log</button>
       <button class="nav-btn" id="nav-history" onclick="showPage('history')">History</button>
+      <span class="plan-badge free" id="plan-badge">FREE</span>
+      <button class="btn-upgrade" id="btn-nav-upgrade" onclick="openUpgradeModal()">Upgrade</button>
+      <button class="btn-manage"  id="btn-nav-manage"  onclick="handleManagePlan()" style="display:none">Manage Plan</button>
       <span class="nav-user" id="nav-user-email"></span>
       <button class="nav-logout" onclick="handleLogout()">Logout</button>
     </div>
@@ -434,7 +467,7 @@ const BUCKET = 'exercises'
 // ── State ──────────────────────────────────────────────────────────────────
 let exercises = [], allSessions = [], pendingSets = []
 let currentCat = 'push', dashCurrentFilter = 'all', histCurrentFilter = 'all'
-let pendingFile = null, currentUser = null
+let pendingFile = null, currentUser = null, currentProfile = null
 
 // ══ AUTH ════════════════════════════════════════════════════════════════════
 
@@ -539,7 +572,7 @@ db.auth.onAuthStateChange((_event, session) => {
     document.getElementById('app').classList.add('active')
     boot()
   } else {
-    currentUser = null
+    currentUser = null; currentProfile = null
     document.getElementById('auth-screen').classList.add('active')
     document.getElementById('app').classList.remove('active')
     allSessions = []; exercises = []; pendingSets = []
@@ -549,11 +582,85 @@ db.auth.onAuthStateChange((_event, session) => {
 // ══ APP ═════════════════════════════════════════════════════════════════════
 
 async function boot() {
-  const { data } = await db.from('exercises').select('*').order('name')
-  exercises = data ?? []
+  const [{ data: exData }, { data: profData }] = await Promise.all([
+    db.from('exercises').select('*').order('name'),
+    db.from('profiles').select('*').eq('id', currentUser.id).single(),
+  ])
+  exercises      = exData   ?? []
+  currentProfile = profData ?? null
+  updatePlanUI()
   await loadSessions()
   renderDashboard()
   populateExerciseSelect()
+  handlePaymentReturn()
+}
+
+function updatePlanUI() {
+  const isPro = currentProfile?.is_premium ?? false
+  const badge = document.getElementById('plan-badge')
+  badge.textContent = isPro ? 'PRO' : 'FREE'
+  badge.className   = isPro ? 'plan-badge pro' : 'plan-badge free'
+  document.getElementById('btn-nav-upgrade').style.display = isPro ? 'none' : ''
+  document.getElementById('btn-nav-manage').style.display  = isPro ? '' : 'none'
+}
+
+function handlePaymentReturn() {
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('payment') === 'success') {
+    history.replaceState({}, '', window.location.pathname)
+    setTimeout(async () => {
+      const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
+      currentProfile = data
+      updatePlanUI()
+      showToast('Welcome to Pro! All features unlocked.')
+    }, 2000) // give webhook a moment
+  }
+}
+
+function showToast(msg) {
+  let t = document.getElementById('app-toast')
+  if (!t) {
+    t = document.createElement('div')
+    t.id = 'app-toast'
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#fff;color:#000;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 22px;z-index:9999;'
+    document.body.appendChild(t)
+  }
+  t.textContent = msg
+  t.style.display = 'block'
+  setTimeout(() => { t.style.display = 'none' }, 4000)
+}
+
+window.openUpgradeModal  = () => document.getElementById('upgrade-modal').classList.add('active')
+window.closeUpgradeModal = () => document.getElementById('upgrade-modal').classList.remove('active')
+
+window.handleUpgrade = async function() {
+  const btn = document.getElementById('btn-modal-upgrade')
+  btn.disabled = true; btn.textContent = 'Redirecting...'
+  const { data: { session } } = await db.auth.getSession()
+  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/create-checkout', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  })
+  const json = await res.json()
+  btn.disabled = false; btn.textContent = 'Upgrade to Pro'
+  if (json.url) window.location.href = json.url
+  else showToast('Error: ' + (json.error ?? 'Unknown'))
+}
+
+window.handleManagePlan = async function() {
+  const btn = document.getElementById('btn-nav-manage')
+  btn.textContent = 'Loading...'
+  const { data: { session } } = await db.auth.getSession()
+  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/customer-portal', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  })
+  const json = await res.json()
+  btn.textContent = 'Manage Plan'
+  if (json.url) window.location.href = json.url
+  else showToast('Error: ' + (json.error ?? 'Unknown'))
 }
 
 async function loadSessions() {
@@ -764,10 +871,26 @@ function renderSets() {
 
 async function uploadFile(sessionId, set) {
   if (!set.file) return null
+
+  const isPro    = currentProfile?.is_premium ?? false
+  const uploads  = currentProfile?.media_uploads_count ?? 0
+  if (!isPro && uploads >= 5) {
+    openUpgradeModal()
+    return null
+  }
+
   const ext  = set.file.name.split('.').pop()
   const path = `${sessionId}/${set.exerciseName.replace(/\s+/g,'-')}-set${set.setNumber}-${Date.now()}.${ext}`
   const { error } = await db.storage.from(BUCKET).upload(path, set.file, { upsert: true })
   if (error) { console.error('Upload error:', error.message); return null }
+
+  // Increment upload count for free users
+  if (!isPro && currentProfile) {
+    const newCount = uploads + 1
+    await db.from('profiles').update({ media_uploads_count: newCount }).eq('id', currentUser.id)
+    currentProfile.media_uploads_count = newCount
+  }
+
   return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl
 }
 
@@ -808,15 +931,37 @@ window.histFilter = function(cat, btn) {
 }
 
 function renderHistory() {
-  const filtered = histCurrentFilter === 'all' ? allSessions : allSessions.filter(s => s.category === histCurrentFilter)
+  const isPro    = currentProfile?.is_premium ?? false
+  const cutoff   = isPro ? null : (() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().split('T')[0] })()
+  const base     = histCurrentFilter === 'all' ? allSessions : allSessions.filter(s => s.category === histCurrentFilter)
+  const filtered = isPro ? base : base.filter(s => s.session_date >= cutoff)
+  const hidden   = isPro ? 0 : base.filter(s => s.session_date < cutoff).length
+
   const el = document.getElementById('hist-sessions')
-  if (!filtered.length) { el.innerHTML = `<div class="empty">No sessions found.</div>`; return }
+
+  let bannerHTML = ''
+  if (!isPro) {
+    const used  = currentProfile?.ai_summaries_used ?? 0
+    const month = currentProfile?.ai_summaries_month
+    const thisMonth = new Date().toISOString().slice(0,7)
+    const summariesLeft = month === thisMonth ? Math.max(0, 3 - used) : 3
+    bannerHTML = `<div class="free-banner">
+      <span class="free-banner-text">
+        <strong>Free plan</strong> &nbsp;·&nbsp; History: last 30 days
+        ${hidden ? ` · <strong>${hidden}</strong> older session${hidden>1?'s':''} hidden` : ''}
+        &nbsp;·&nbsp; AI summaries: <strong>${summariesLeft}/3</strong> left this month
+      </span>
+      <button class="btn-free-upgrade" onclick="openUpgradeModal()">Upgrade to Pro</button>
+    </div>`
+  }
+
+  if (!filtered.length) { el.innerHTML = bannerHTML + `<div class="empty">No sessions found.</div>`; return }
   const months = {}
   filtered.forEach(s => {
     const key = new Date(s.session_date+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long'})
     if (!months[key]) months[key] = []; months[key].push(s)
   })
-  el.innerHTML = Object.entries(months).map(([month, sessions]) => `
+  el.innerHTML = bannerHTML + Object.entries(months).map(([month, sessions]) => `
     <div style="margin-bottom:30px;">
       <div class="label" style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--b1);">
         ${month} · ${sessions.length} session${sessions.length>1?'s':''}
@@ -970,10 +1115,18 @@ async function summarizeSession(sessionId, btn) {
         body: JSON.stringify({ session_id: sessionId }) }
     )
     const json = await res.json()
+    if (res.status === 402 && json.error === 'LIMIT_REACHED') {
+      btn.disabled = false; btn.textContent = '◆ AI Summary'
+      openUpgradeModal()
+      return
+    }
     if (!res.ok) throw new Error(json.error || res.statusText)
     text.textContent = json.summary
     box.classList.add('visible')
     btn.textContent = '◆ Hide Summary'
+    // Refresh profile so banner usage count updates
+    const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single()
+    if (data) { currentProfile = data; renderHistory() }
   } catch (err) {
     text.textContent = 'Error: ' + err.message
     box.classList.add('visible')
@@ -984,5 +1137,23 @@ async function summarizeSession(sessionId, btn) {
 
 function todayStr() { return new Date().toISOString().split('T')[0] }
 </script>
+
+<!-- ══ UPGRADE MODAL ══ -->
+<div class="modal-overlay" id="upgrade-modal">
+  <div class="modal-box">
+    <div class="modal-label">Fortress Pro</div>
+    <div class="modal-title">Go Pro</div>
+    <div class="modal-price">$4.99 / month &nbsp;·&nbsp; Cancel anytime</div>
+    <ul class="modal-features">
+      <li>Unlimited AI session summaries</li>
+      <li>Full workout history (free = last 30 days)</li>
+      <li>Unlimited media uploads (free = 5 files)</li>
+      <li>Progress charts &amp; PR tracking <span style="color:#333;font-size:10px;">(coming soon)</span></li>
+      <li>Export to PDF / CSV <span style="color:#333;font-size:10px;">(coming soon)</span></li>
+    </ul>
+    <button class="modal-cta" id="btn-modal-upgrade" onclick="handleUpgrade()">Upgrade to Pro</button>
+    <button class="modal-close" onclick="closeUpgradeModal()">Maybe later</button>
+  </div>
+</div>
 </body>
 </html>
