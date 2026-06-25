@@ -491,6 +491,11 @@ const SUPA_URL = 'https://enzopvdeyxichitmoosn.supabase.co'
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuem9wdmRleXhpY2hpdG1vb3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MTU5MTYsImV4cCI6MjA5NzI5MTkxNn0._S-oNfp3zdD62kzw3QvbKxlsNWuSy679VNV3_Ng_9YE'
 const db = createClient(SUPA_URL, SUPA_KEY)
 const BUCKET = 'exercises'
+const EDGE = SUPA_URL + '/functions/v1'
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+}
 
 // ── State ──────────────────────────────────────────────────────────────────
 let exercises = [], allSessions = [], pendingSets = []
@@ -686,7 +691,7 @@ async function handlePaymentReturn() {
 
   try {
     const { data: { session } } = await db.auth.getSession()
-    const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/verify-payment', {
+    const res  = await fetch(`${EDGE}/verify-payment`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ payment_id: paymentId }),
@@ -741,16 +746,18 @@ window.closeUpgradeModal = () => document.getElementById('upgrade-modal').classL
 window.handleUpgrade = async function() {
   const btn = document.getElementById('btn-modal-upgrade')
   btn.disabled = true; btn.textContent = 'Redirecting...'
-  const { data: { session } } = await db.auth.getSession()
-  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/create-checkout', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
-  })
-  const json = await res.json()
+  try {
+    const { data: { session } } = await db.auth.getSession()
+    const res  = await fetch(`${EDGE}/create-checkout`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
+    const json = await res.json()
+    if (json.url) { window.location.href = json.url; return }
+    showToast('Error: ' + (json.error ?? 'Unknown'))
+  } catch { showToast('Network error — please try again') }
   btn.disabled = false; btn.textContent = 'Upgrade to Pro'
-  if (json.url) window.location.href = json.url
-  else showToast('Error: ' + (json.error ?? 'Unknown'))
 }
 
 window.handleManagePlan = function() {
@@ -767,32 +774,40 @@ window.handleManagePlan = function() {
 window.handleRenewPlan = async function() {
   const btn = document.getElementById('btn-renew')
   btn.disabled = true; btn.textContent = 'Redirecting...'
-  const { data: { session } } = await db.auth.getSession()
-  const res  = await fetch('https://enzopvdeyxichitmoosn.supabase.co/functions/v1/create-checkout', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
-  })
-  const json = await res.json()
-  btn.disabled = false; btn.textContent = 'Renew — 5 KWD / 30 days'
-  if (json.url) window.location.href = json.url
-  else { btn.textContent = 'Error — try again' }
+  try {
+    const { data: { session } } = await db.auth.getSession()
+    const res  = await fetch(`${EDGE}/create-checkout`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
+    const json = await res.json()
+    if (json.url) { window.location.href = json.url; return }
+    btn.textContent = 'Error — try again'
+  } catch { btn.textContent = 'Error — try again' }
+  btn.disabled = false
 }
 
 window.handleCancelPlan = async function() {
   if (!confirm('Cancel your Pro plan? You will lose access immediately.')) return
   const btn = document.getElementById('btn-cancel-plan')
   btn.disabled = true; btn.textContent = 'Cancelling...'
-  const { error } = await db.from('profiles').update({
-    is_premium: false,
-    subscription_status: 'cancelled',
-  }).eq('id', currentUser.id)
-  if (error) { btn.disabled = false; btn.textContent = 'Error — try again'; return }
-  currentProfile.is_premium = false
-  currentProfile.subscription_status = 'cancelled'
-  updatePlanUI()
-  document.getElementById('manage-modal').classList.remove('active')
-  showToast('Plan cancelled. You are now on the Free plan.')
+  try {
+    const { data: { session } } = await db.auth.getSession()
+    const res = await fetch(`${EDGE}/cancel-plan`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || res.statusText)
+    currentProfile.is_premium = false
+    currentProfile.subscription_status = 'cancelled'
+    updatePlanUI()
+    document.getElementById('manage-modal').classList.remove('active')
+    showToast('Plan cancelled. You are now on the Free plan.')
+  } catch (err) {
+    btn.disabled = false; btn.textContent = 'Error — try again'
+  }
 }
 
 async function loadSessions() {
@@ -862,7 +877,7 @@ function sessionRowHTML(s) {
   const sets = s.workout_sets ?? [], volume = sets.reduce((a,x)=>a+(x.weight||0)*x.reps,0)
   const names = [...new Set(sets.map(x=>x.exercise_name))]
   const date  = new Date(s.session_date + 'T00:00:00')
-  const tags  = names.slice(0,4).map(n=>`<span class="ex-tag">${n}</span>`).join('')
+  const tags  = names.slice(0,4).map(n=>`<span class="ex-tag">${esc(n)}</span>`).join('')
   const more  = names.length > 4 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-4} more</span>` : ''
 
   const groups = {}
@@ -870,11 +885,11 @@ function sessionRowHTML(s) {
   const setsDetail = Object.entries(groups).map(([name, exSets]) => `
     <div class="ex-block">
       <div class="ex-block-head">
-        <div><span class="ex-name">${name}</span><span class="ex-muscle">${exSets[0].muscle_targeted}</span></div>
+        <div><span class="ex-name">${esc(name)}</span><span class="ex-muscle">${esc(exSets[0].muscle_targeted)}</span></div>
       </div>
       <div class="set-chips">${exSets.map(x=>`
-        <span class="set-chip-wrap" data-set-id="${x.id}" data-weight="${x.weight??''}" data-reps="${x.reps}">
-          <span class="set-chip">${x.weight?x.weight+'kg':'BW'} &times; ${x.reps}</span>
+        <span class="set-chip-wrap" data-set-id="${esc(x.id)}" data-weight="${esc(x.weight??'')}" data-reps="${esc(x.reps)}">
+          <span class="set-chip">${x.weight?esc(x.weight)+'kg':'BW'} &times; ${esc(x.reps)}</span>
           <button class="btn-edit-set" title="Edit set">&#9998;</button>
         </span>`).join('')}
       </div>
@@ -914,7 +929,7 @@ function populateExerciseSelect() {
   const sel = document.getElementById('ex-select')
   sel.innerHTML = `<option value="">— Select exercise —</option>` +
     exercises.filter(e => e.category === currentCat)
-      .map(e=>`<option value="${e.id}" data-muscle="${e.muscle_targeted}">${e.name} (${e.muscle_targeted})</option>`).join('') +
+      .map(e=>`<option value="${esc(e.id)}" data-muscle="${esc(e.muscle_targeted)}">${esc(e.name)} (${esc(e.muscle_targeted)})</option>`).join('') +
     `<option value="__custom__">+ Custom exercise</option>`
   document.getElementById('custom-fields').style.display = 'none'
   updateAddBtn()
@@ -983,13 +998,13 @@ function renderSets() {
   el.innerHTML = `<div class="set-rows">` +
     Object.entries(groups).map(([name, rows]) => `
       <div>
-        <div class="set-group-head"><span>${name}</span><span style="color:var(--t3);font-size:10px;">${rows[0].muscleTargeted}</span></div>
+        <div class="set-group-head"><span>${esc(name)}</span><span style="color:var(--t3);font-size:10px;">${esc(rows[0].muscleTargeted)}</span></div>
         ${rows.map(r=>`
           <div class="set-row">
-            <span class="set-num">${r.setNumber}</span>
-            <span class="set-info">${r.weight?r.weight+' kg':'BW'} × ${r.reps}</span>
-            ${r.file?`<span class="set-has-media">📎 ${r.file.name.length>14?r.file.name.slice(0,12)+'…':r.file.name}</span>`:''}
-            <button class="btn-danger" data-idx="${r.idx}">✕</button>
+            <span class="set-num">${esc(r.setNumber)}</span>
+            <span class="set-info">${r.weight?esc(r.weight)+' kg':'BW'} × ${esc(r.reps)}</span>
+            ${r.file?`<span class="set-has-media">📎 ${esc(r.file.name.length>14?r.file.name.slice(0,12)+'…':r.file.name)}</span>`:''}
+            <button class="btn-danger" data-idx="${esc(r.idx)}">✕</button>
           </div>`).join('')}
       </div>`).join('') + `</div>`
   el.querySelectorAll('.btn-danger').forEach(btn => {
@@ -1124,30 +1139,32 @@ function renderHistory() {
 function mediaHTML(set) {
   if (!set.media_url) return ''
   const url = set.media_url
-  if (/\.(jpe?g|png|gif|webp)(\?|$)/i.test(url)) return `<a href="${url}" target="_blank"><img src="${url}" class="media-thumb" /></a>`
-  if (/\.(mp4|mov|webm)(\?|$)/i.test(url)) return `<a href="${url}" target="_blank" class="media-file-link">▶ Video</a>`
-  return `<a href="${url}" target="_blank" class="media-file-link">📎 File</a>`
+  if (!url.startsWith('https://')) return ''
+  const safeUrl = esc(url)
+  if (/\.(jpe?g|png|gif|webp)(\?|$)/i.test(url)) return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer"><img src="${safeUrl}" class="media-thumb" /></a>`
+  if (/\.(mp4|mov|webm)(\?|$)/i.test(url)) return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="media-file-link">▶ Video</a>`
+  return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="media-file-link">📎 File</a>`
 }
 
 function histSessionHTML(s) {
   const sets = s.workout_sets??[], volume = sets.reduce((a,x)=>a+(x.weight||0)*x.reps,0)
   const date = new Date(s.session_date+'T00:00:00'), names = [...new Set(sets.map(x=>x.exercise_name))]
-  const tags = names.slice(0,3).map(n=>`<span class="ex-tag">${n}</span>`).join('')
+  const tags = names.slice(0,3).map(n=>`<span class="ex-tag">${esc(n)}</span>`).join('')
   const more = names.length > 3 ? `<span style="font-size:11px;color:var(--t3);">+${names.length-3}</span>` : ''
   const groups = {}
   sets.forEach(s => { if (!groups[s.exercise_name]) groups[s.exercise_name]=[]; groups[s.exercise_name].push(s) })
   const detailHTML = Object.entries(groups).map(([name, exSets]) => {
     const best = exSets.reduce((b,x)=>(!b.weight||(x.weight||0)>(b.weight||0)?x:b), exSets[0])
     const chips = exSets.map(x=>`
-      <span class="set-chip-wrap" data-set-id="${x.id}" data-weight="${x.weight??''}" data-reps="${x.reps}">
-        <span class="set-chip">${x.weight?x.weight+'kg':'BW'} &times; ${x.reps}</span>
+      <span class="set-chip-wrap" data-set-id="${esc(x.id)}" data-weight="${esc(x.weight??'')}" data-reps="${esc(x.reps)}">
+        <span class="set-chip">${x.weight?esc(x.weight)+'kg':'BW'} &times; ${esc(x.reps)}</span>
         <button class="btn-edit-set" title="Edit set">&#9998;</button>
       </span>${mediaHTML(x)}`).join('')
     return `
       <div class="ex-block">
         <div class="ex-block-head">
-          <div><span class="ex-name">${name}</span><span class="ex-muscle">${exSets[0].muscle_targeted}</span></div>
-          ${best.weight?`<span class="ex-best">Best: ${best.weight} kg × ${best.reps}</span>`:''}
+          <div><span class="ex-name">${esc(name)}</span><span class="ex-muscle">${esc(exSets[0].muscle_targeted)}</span></div>
+          ${best.weight?`<span class="ex-best">Best: ${esc(best.weight)} kg × ${esc(best.reps)}</span>`:''}
         </div>
         <div class="set-chips">${chips}</div>
       </div>`
@@ -1189,9 +1206,9 @@ async function editSet(wrap) {
   // Replace chip with inline form
   wrap.innerHTML = `
     <span class="set-edit-form">
-      <input type="number" class="edit-weight" placeholder="kg" value="${weight}" min="0" step="0.5" />
+      <input type="number" class="edit-weight" placeholder="kg" value="${esc(weight)}" min="0" step="0.5" />
       <span style="color:var(--t3);font-size:12px;">×</span>
-      <input type="number" class="edit-reps" placeholder="reps" value="${reps}" min="1" step="1" />
+      <input type="number" class="edit-reps" placeholder="reps" value="${esc(reps)}" min="1" step="1" />
       <button class="btn-save-set">Save</button>
       <button class="btn-cancel-set">Cancel</button>
     </span>`
@@ -1203,7 +1220,7 @@ async function editSet(wrap) {
 
   form.querySelector('.btn-cancel-set').addEventListener('click', () => {
     wrap.innerHTML = `
-      <span class="set-chip">${weight ? weight + 'kg' : 'BW'} &times; ${reps}</span>
+      <span class="set-chip">${weight ? esc(weight) + 'kg' : 'BW'} &times; ${esc(reps)}</span>
       <button class="btn-edit-set" title="Edit set">&#9998;</button>`
     wrap.querySelector('.btn-edit-set').addEventListener('click', e => { e.stopPropagation(); editSet(wrap) })
   })
@@ -1223,7 +1240,7 @@ async function editSet(wrap) {
     wrap.dataset.weight = newWeight ?? ''
     wrap.dataset.reps   = newReps
     wrap.innerHTML = `
-      <span class="set-chip">${newWeight ? newWeight + 'kg' : 'BW'} &times; ${newReps}</span>
+      <span class="set-chip">${newWeight ? esc(newWeight) + 'kg' : 'BW'} &times; ${esc(newReps)}</span>
       <button class="btn-edit-set" title="Edit set">&#9998;</button>`
     wrap.querySelector('.btn-edit-set').addEventListener('click', e => { e.stopPropagation(); editSet(wrap) })
   })
@@ -1241,7 +1258,7 @@ async function summarizeSession(sessionId, btn) {
 
   try {
     const res = await fetch(
-      `https://enzopvdeyxichitmoosn.supabase.co/functions/v1/summarize-session`,
+      `${EDGE}/summarize-session`,
       { method: 'POST',
         headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId }) }
